@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlusBus Bolivia - Inicio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/index.css">
+</head>
+<body>
+
+    <button class="menu-toggle-btn" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="sidebar" id="sidebarMenu">
+        <div class="sidebar-brand">
+            <i class="fas fa-bus"></i>
+            <span>PlusBus</span>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="/" class="active"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="/pasajes"><i class="fas fa-ticket-alt"></i> Pasajes</a></li>
+            <li><a href="/pago"><i class="fas fa-credit-card"></i> Pagar Ticket</a></li>
+            <li><a href="/turismo"><i class="fas fa-map-marked-alt"></i> Guía Turismo</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>v2.5 © 2026</p>
+        </div>
+    </nav>
+
+    <div class="main-layout" id="mainLayout">
+        
+        <section class="hero-section">
+            <div class="hero-container">
+                <span class="hero-badge"><i class="fas fa-shield-alt"></i> Compra 100% Segura y Certificada</span>
+                <h1>Busca, compara y compra <br><span class="orange-text">tus pasajes en Bolivia</span></h1>
+                <p>Compara precios, horarios y asientos de las mejores flotas interdepartamentales en un solo lugar.</p>
+            </div>
+        </section>
+
+        <section class="quick-search-section">
+            <div class="kupos-search-card">
+                <div class="search-grid">
+                    <div class="search-input-box">
+                        <label><i class="fas fa-map-marker-alt"></i> Origen</label>
+                        <input type="text" id="quickOrigen" placeholder="¿Desde dónde viajas?" value="La Paz">
+                    </div>
+                    
+                    <button class="swap-locations-btn" type="button" id="swapLocations">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+
+                    <div class="search-input-box">
+                        <label><i class="fas fa-flag-checkered"></i> Destino</label>
+                        <input type="text" id="quickDestino" placeholder="¿A dónde vas?" value="Cochabamba">
+                    </div>
+                    <div class="search-input-box">
+                        <label><i class="fas fa-calendar-alt"></i> Fecha de Ida</label>
+                        <input type="date" id="quickFecha">
+                    </div>
+                    <button class="btn-search-trigger" id="quickBuscarBtn">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-tags"></i></div>
+                    <h3>Sin Cargos Ocultos</h3>
+                    <p>Encuentras el mismo precio de la terminal, directamente en tu pantalla.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>Emisión Inmediata</h3>
+                    <p>Recibe tu pasaje digital con código QR directo en tu WhatsApp al instante.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                    <h3>Soporte 24/7</h3>
+                    <p>Estamos listos para asistirte en cualquier reprogramación durante tu ruta.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 class="counter" data-target="45000">0</h3>
+                    <p>Usuarios Mensuales</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="counter" data-target="120">0</h3>
+                    <p>Rutas Habilitadas</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="counter" data-target="9">0</h3>
+                    <p>Departamentos Conectados</p>
+                </div>
+            </div>
+        </section>
+<section class="partners-section">
+    <div class="partners-container">
+        <h2>Viaja con las mejores flotas de Bolivia</h2>
+        <p class="section-subtitle">Alianzas oficiales con las empresas más seguras y puntuales del país.</p>
+        <div class="partners-logos-grid">
+            <div class="partner-logo-item">
+                <i class="fas fa-bus-alt"></i>
+                <span>Trans Copacabana</span>
+            </div>
+            <div class="partner-logo-item">
+                <i class="fas fa-bus-alt"></i>
+                <span>Flota El Dorado</span>
+            </div>
+            <div class="partner-logo-item">
+                <i class="fas fa-bus-alt"></i>
+                <span>Flota Bolívar</span>
+            </div>
+            <div class="partner-logo-item">
+                <i class="fas fa-bus-alt"></i>
+                <span>Expreso Sucre</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="faq-section">
+    <div class="faq-container">
+        <h2>Preguntas Frecuentes</h2>
+        <p class="section-subtitle">Todo lo que necesitas saber antes de asegurar tu pasaje.</p>
+        
+        <div class="faq-accordion">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>¿Necesito imprimir mi pasaje digital antes de subir al bus?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>No es estrictamente necesario en todas las flotas. Con tu pasaje en el celular y el código QR puedes presentarte directo en el andén, aunque te recomendamos llegar 20 minutos antes por si la empresa solicita la validación en ventanilla.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>¿Cómo se realiza el pago si no tengo tarjeta de crédito?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>¡Es súper fácil! Puedes pagar usando QR Simple desde la aplicación móvil de cualquier banco boliviano. La validación del pago se procesa de forma automática en nuestra plataforma.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>¿Puedo cambiar la fecha de mi viaje o solicitar devolución?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, las reprogramaciones se permiten hasta con 24 horas de anticipación directamente desde el panel o contactando a nuestro soporte técnico 24/7 de PlusBus.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="popular-routes-section">
+    <div class="routes-container">
+        <h2>Las rutas más viajadas por los bolivianos</h2>
+        <div class="routes-grid">
+            
+            <div class="route-card" onclick="buscarRutaDirecta('La Paz', 'Cochabamba')">
+                <div class="route-info">
+                    <h4>La Paz a Cochabamba</h4>
+                    <span>Precios desde <strong>Bs 40</strong></span>
+                </div>
+                <div class="route-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <div class="route-card" onclick="buscarRutaDirecta('Cochabamba', 'Santa Cruz')">
+                <div class="route-info">
+                    <h4>Cochabamba a Santa Cruz</h4>
+                    <span>Precios desde <strong>Bs 80</strong></span>
+                </div>
+                <div class="route-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <div class="route-card" onclick="buscarRutaDirecta('La Paz', 'Oruro')">
+                <div class="route-info">
+                    <h4>La Paz a Oruro</h4>
+                    <span>Precios desde <strong>Bs 30</strong></span>
+                </div>
+                <div class="route-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <div class="route-card" onclick="buscarRutaDirecta('Sucre', 'Potosí')">
+                <div class="route-info">
+                    <h4>Sucre a Potosí</h4>
+                    <span>Precios desde <strong>Bs 25</strong></span>
+                </div>
+                <div class="route-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+        <footer class="footer-modern">
+            <p>&copy; 2026 PlusBus Bolivia. Inspirado en plataformas globales de transporte masivo.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

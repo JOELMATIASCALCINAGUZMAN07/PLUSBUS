@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlusBus - Guía de Turismo de Bolivia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="icon" href="/static/css/index.css">
+    <link rel="stylesheet" href="/static/css/turismo.css">
+</head>
+<body>
+
+    <button class="menu-toggle-btn" id="menuToggle"><i class="fas fa-bars"></i></button>
+
+    <nav class="sidebar" id="sidebarMenu">
+        <div class="sidebar-brand"><i class="fas fa-bus"></i> <span>PlusBus</span></div>
+        <ul class="sidebar-links">
+            <li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="/pasajes"><i class="fas fa-ticket-alt"></i> Pasajes</a></li>
+            <li><a href="/pago"><i class="fas fa-credit-card"></i> Pagar Ticket</a></li>
+            <li><a href="/turismo" class="active"><i class="fas fa-map-marked-alt"></i> Guía Turismo</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-layout" id="mainLayout">
+        <section class="page-title">
+            <h1>Destinos Turísticos de Bolivia</h1>
+            <p>Selecciona una región para filtrar los atractivos de los 9 departamentos.</p>
+        </section>
+
+        <section class="container">
+            <div class="filter-tab-bar">
+                <button class="filter-trigger-btn active" data-filter="todos">Ver Todo Bolivia</button>
+                <button class="filter-trigger-btn" data-filter="alti">Macro Altiplano</button>
+                <button class="filter-trigger-btn" data-filter="valles">Valles Centrales</button>
+                <button class="filter-trigger-btn" data-filter="llanos">Llanos y Amazonía</button>
+            </div>
+
+            <div class="gallery-grid">
+                
+                <div class="photo-card" data-cat="alti" onclick="abrirPopUp('La Paz', 'Ciudad de los Andes rodeada de montañas sagradas. Súbete al sistema de teleféricos urbanos más alto del mundo, recorre las místicas calles coloniales y explora las ruinas ancestrales de Tiwanaku o el imponente Camino del Inca.', 'https://images.unsplash.com/photo-1583996260527-70066a466621?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1583996260527-70066a466621?auto=format&fit=crop&q=80&w=500" alt="La Paz">
+                    <div class="card-overlay-info">
+                        <h3>La Paz</h3>
+                        <span><i class="fas fa-map-marker-alt"></i> Teleférico y Tiwanaku</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="valles" onclick="abrirPopUp('Cochabamba', 'El corazón gastronómico de Bolivia. Disfruta de su clima templado eterno, admira el monumental Cristo de la Concordia y deléitate con su variada e inigualable cocina tradicional en el valle central.', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=500" alt="Cochabamba">
+                    <div class="card-overlay-info">
+                        <h3>Cochabamba</h3>
+                        <span><i class="fas fa-utensils"></i> Capital Gastronómica</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="llanos" onclick="abrirPopUp('Santa Cruz', 'Tierra cálida de gran desarrollo, selva tropical y llanuras infinitas. Visita las joyas arquitectónicas de las Misiones Chiquitanas, el Parque Nacional Amboró y los paradisíacos entornos de Samaipata.', 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=80&w=500" alt="Santa Cruz">
+                    <div class="card-overlay-info">
+                        <h3>Santa Cruz</h3>
+                        <span><i class="fas fa-tree"></i> Misiones Chiquitanas</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="alti" onclick="abrirPopUp('Potosí', 'Hogar del majestuoso Salar de Uyuni, el desierto de sal continuo más grande del mundo. Explora también la histórica e imperial ciudad de Potosí a los pies del legendario Cerro Rico.', 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=500" alt="Potosí">
+                    <div class="card-overlay-info">
+                        <h3>Potosí</h3>
+                        <span><i class="fas fa-snowflake"></i> Salar de Uyuni</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="alti" onclick="abrirPopUp('Oruro', 'La Capital del Folklore de Bolivia. Conoce su rica herencia minera, las aguas termales y vive la experiencia única de su majestuoso Carnaval, declarado Obra Maestra del Patrimonio Oral e Intangible.', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=500" alt="Oruro">
+                    <div class="card-overlay-info">
+                        <h3>Oruro</h3>
+                        <span><i class="fas fa-mask"></i> Carnaval Ancestral</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="valles" onclick="abrirPopUp('Chuquisaca (Sucre)', 'La ilustre ciudad blanca y capital constitucional del país. Sorpréndete con su impecable arquitectura colonial, museos republicanos y los yacimientos de huellas de dinosaurio más grandes del mundo en Cal Orck\'o.', 'https://images.unsplash.com/photo-1505995433366-e12c47f3f144?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1505995433366-e12c47f3f144?auto=format&fit=crop&q=80&w=500" alt="Sucre">
+                    <div class="card-overlay-info">
+                        <h3>Chuquisaca</h3>
+                        <span><i class="fas fa-monument"></i> Sucre Ciudad Blanca</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="valles" onclick="abrirPopUp('Tarija', 'La hermosa tierra del vino y del singani boliviano. Recorre los viñedos de altura del Valle de la Concepción, disfruta de su música tradicional, la amabilidad de su gente y su excelente gastronomía.', 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&q=80&w=500" alt="Tarija">
+                    <div class="card-overlay-info">
+                        <h3>Tarija</h3>
+                        <span><i class="fas fa-wine-glass-alt"></i> Viñedos de Altura</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="llanos" onclick="abrirPopUp('Beni', 'Inmensas llanuras e imponentes ríos amazónicos. Un santuario de biodiversidad perfecto para el ecoturismo, la navegación fluvial y el avistamiento de los hermosos bufeos (delfines rosados) de agua dulce.', 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=500" alt="Beni">
+                    <div class="card-overlay-info">
+                        <h3>Beni</h3>
+                        <span><i class="fas fa-fish"></i> Naturaleza Salvaje</span>
+                    </div>
+                </div>
+
+                <div class="photo-card" data-cat="llanos" onclick="abrirPopUp('Pando', 'El rincón indómito de la Amazonía boliviana. Cubierto por espesas selvas y ríos caudalosos, es el centro histórico de la recolección de castaña y un destino fascinante para la aventura extrema.', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=500')">
+                    <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=500" alt="Pando">
+                    <div class="card-overlay-info">
+                        <h3>Pando</h3>
+                        <span><i class="fas fa-feather-alt"></i> Amazonía Indómita</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <div id="popupTurismo" class="popup-backdrop" onclick="cerrarPopUp()">
+        <div class="popup-window" onclick="event.stopPropagation()">
+            <img id="popupImg" src="" alt="Destino">
+            <div class="popup-contents">
+                <h2 id="popupTitle">Título Departamento</h2>
+                <p id="popupDesc">Información detallada...</p>
+                <button class="btn-popup-action" onclick="window.location.href='/pasajes'"><i class="fas fa-bus"></i> Buscar Flotas Disponibles</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completar Pago Seguro - PlusBus Bolivia</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/pago.css">
+</head>
+<body>
+ 
+      
+    <button class="menu-toggle-btn" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="sidebar" id="sidebarMenu">
+        <div class="sidebar-brand">
+            <i class="fas fa-bus"></i>
+            <span>PlusBus</span>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="/" class="active"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="/pasajes"><i class="fas fa-ticket-alt"></i> Pasajes</a></li>
+            <li><a href="/pago"><i class="fas fa-credit-card"></i> Pagar Ticket</a></li>
+            <li><a href="/turismo"><i class="fas fa-map-marked-alt"></i> Guía Turismo</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>v2.5 © 2026</p>
+        </div>
+    </nav>
+ 
+
+    <section class="checkout-section">
+        <div class="checkout-grid-container">
+            
+            <div class="checkout-left-panel" id="contenedorFormulario">
+                <h2 class="panel-main-title">Completar Pago Seguro</h2>
+                
+                <div class="passenger-tabs">
+                    <span class="tab-btn">Pasajero Principal</span>
+                </div>
+
+                <form id="paymentForm">
+                    <div class="form-section-block">
+                        <div class="input-row">
+                            <div class="form-group-custom">
+                                <label for="nombrePasajero">Nombre Completo</label>
+                                <input type="text" id="nombrePasajero" placeholder="JUAN PEREZ FLORES" required>
+                            </div>
+                        </div>
+                        <div class="input-row split-2">
+                            <div class="form-group-custom">
+                                <label for="ciPasajero">Número de CI / Documento</label>
+                                <input type="text" id="ciPasajero" placeholder="Ej: 8472910" required>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="emailPasajero">Correo Electrónico</label>
+                                <input type="email" id="emailPasajero" placeholder="juan.perez@email.com" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="sub-panel-title">Método de Pago</h3>
+                    <div class="payment-method-selector">
+                        <label class="method-option active" id="optionCard">
+                            <input type="radio" name="paymentMethod" value="tarjeta" id="radioTarjeta" checked>
+                            <i class="fas fa-credit-card"></i> Tarjeta Débito / Crédito
+                        </label>
+                        <label class="method-option" id="optionQR">
+                            <input type="radio" name="paymentMethod" value="qr" id="radioQR">
+                            <i class="fas fa-qrcode"></i> QR Simple (Bancos)
+                        </label>
+                    </div>
+
+                    <div id="panelTarjeta" class="payment-details-form active">
+                        <div class="form-group-custom">
+                            <label for="cardNumber">Número de Tarjeta</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-credit-card icon-inside"></i>
+                                <input type="text" id="cardNumber" placeholder="4000 1234 5678 9010" maxlength="19">
+                            </div>
+                        </div>
+                        <div class="input-row split-2">
+                            <div class="form-group-custom">
+                                <label for="cardExpiry">Vencimiento</label>
+                                <input type="text" id="cardExpiry" placeholder="MM/AA" maxlength="5">
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="cardCvv">CVV</label>
+                                <input type="password" id="cardCvv" placeholder="***" maxlength="4">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="panelQR" class="payment-details-form">
+                        <div class="qr-info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Al confirmar se generará un código QR único en pantalla. Escanéalo desde tu app móvil bancaria para pagar inmediatamente de forma segura.</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit-pay" id="btnPagar">
+                        <i class="fas fa-lock"></i> Pagar Seguro y Confirmar
+                    </button>
+                </form>
+            </div>
+
+            <div class="checkout-right-panel">
+                <h3 class="ticket-view-title">Vista Gráfica del Pasaje</h3>
+                
+                <div class="virtual-ticket-card" id="boletoGrafico">
+                    <div class="ticket-header-blue">
+                        <div class="ticket-bus-icon">
+                            <i class="fas fa-bus"></i>
+                        </div>
+                        <div class="ticket-route-text">
+                            <span id="ticketOrigen">Origen</span>
+                            <i class="fas fa-arrow-right"></i>
+                            <span id="ticketDestino">Destino</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-body-white">
+                        <div class="ticket-info-grid">
+                            <div class="info-cell">
+                                <span class="cell-label">Fecha</span>
+                                <span class="cell-value" id="ticketFecha">--/--/----</span>
+                            </div>
+                            <div class="info-cell">
+                                <span class="cell-label">Hora</span>
+                                <span class="cell-value" id="ticketHora">--:--</span>
+                            </div>
+                            <div class="info-cell">
+                                <span class="cell-label">Asiento</span>
+                                <span class="cell-value" id="ticketAsiento">7</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-info-grid margin-top-sm">
+                            <div class="info-cell-full">
+                                <span class="cell-label">Empresa</span>
+                                <span class="cell-value text-blue" id="ticketEmpresa">Seleccione un viaje</span>
+                            </div>
+                            <div class="info-cell-price">
+                                <span class="cell-label">Precio Total</span>
+                                <span class="cell-value price-tag">Bs <span id="ticketPrecio">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-qr-footer-area">
+                    <div class="qr-scanner-wrapper">
+                        <div class="qr-scanner-corner top-left"></div>
+                        <div class="qr-scanner-corner top-right"></div>
+                        <div class="qr-scanner-corner bottom-left"></div>
+                        <div class="qr-scanner-corner bottom-right"></div>
+                        <i class="fas fa-qrcode generic-qr-icon"></i>
+                    </div>
+                    <p class="qr-footer-caption">Código de verificación pre-aprobado</p>
+                </div>
+
+                <div class="invoice-summary-card">
+                    <h4>Detalle de la transacción</h4>
+                    <div class="invoice-row">
+                        <span id="invoiceItemRuta">Pasaje de bus</span>
+                        <span class="invoice-val">Bs <span id="invoiceMontoBase">0</span></span>
+                    </div>
+                    <div class="invoice-row">
+                        <span>Uso de terminal terrestre</span>
+                        <span class="invoice-val text-green">Gratis</span>
+                    </div>
+                    <div class="invoice-divider"></div>
+                    <div class="invoice-row total-row">
+                        <span>Monto Total a Pagar</span>
+                        <span>Bs <span id="invoiceMontoTotal">0</span></span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="footer-local">
+        <p>&copy; 2026 PlusBus Bolivia – Pasajes Interdepartamentales Autónomos</p>
+    </footer>
+
+    <script src="/static/js/pago.js"></script> 
+</body>
+</html>
