@@ -1,4 +1,3 @@
-
 let menuToggle = document.getElementById('menuToggle');
 let sidebarMenu = document.getElementById('sidebarMenu');
 let mainLayout = document.getElementById('mainLayout');
@@ -7,7 +6,7 @@ if (menuToggle && sidebarMenu && mainLayout) {
     menuToggle.addEventListener('click', () => {
         sidebarMenu.classList.toggle('active');
         mainLayout.classList.toggle('shifted');
-        
+
         let icon = menuToggle.querySelector('i');
         if (sidebarMenu.classList.contains('active')) {
             icon.className = 'fas fa-times';
@@ -16,11 +15,34 @@ if (menuToggle && sidebarMenu && mainLayout) {
         }
     });
 }
+ 
+// NUEVA CLASE: GESTOR DE DESCUENTOS  
+class GestorDescuentos {
+    constructor(precioBase) {
+        // Almacena el costo original del pasaje recuperado
+        this.precioBase = parseFloat(precioBase) || 0;
+    }
+
+    // IMPLEMENTACIÓN DEL MÉTODO COMPLEMENTARIO SOLICITADO
+    calcularDescuento(codigo) {
+        let descuento = 0;
+        let codigoLimpio = codigo.trim().toUpperCase();
+
+        // Lógica condicional analítica para evaluar cupones válidos
+        if (codigoLimpio === "PLUSBUS2026") {
+            descuento = this.precioBase * 0.15; // 15% Descuento Promocional General
+        } else if (codigoLimpio === "ESTUDIANTE") {
+            descuento = this.precioBase * 0.10; // 10% Descuento preferencial de estudiante
+        }
+
+        return descuento;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     // SE RECUPERAN LOS DATOS ALMACENADOS PREVIAMENTE
     let compraData = JSON.parse(localStorage.getItem('compraPendiente')) || {};
-    
+
     // NODOS DEL COMPONENTE TICKET DIGITAL
     let tOrigen = document.getElementById('ticketOrigen');
     let tDestino = document.getElementById('ticketDestino');
@@ -34,77 +56,82 @@ document.addEventListener('DOMContentLoaded', () => {
     let invMontoBase = document.getElementById('invoiceMontoBase');
     let invMontoTotal = document.getElementById('invoiceMontoTotal');
 
-    if (compraData.id) {
-        // ACTUALIZACIÓN DE TEXTOS EN EL BOLETO VIRTUAL
-        tOrigen.textContent = compraData.origen;
-        tDestino.textContent = compraData.destino;
-        tFecha.textContent = compraData.fecha || "26/02/2026";
-        tHora.textContent = compraData.hora || "17:00";
-        tEmpresa.textContent = compraData.empresa;
-        tPrecio.textContent = compraData.precio;
+    // Instancia global inicial del precio base para la lógica de negocio
+    let precioOriginal = parseFloat(compraData.precio) || 0;
 
-        // ACTUALIZACIÓN EN EL RESUMEN DE COMPRA INFERIOR
-        invRuta.textContent = `Pasaje: ${compraData.origen} a ${compraData.destino}`;
-        invMontoBase.textContent = compraData.precio;
-        invMontoTotal.textContent = compraData.precio;
-    } else {
-        // SI SE ENTRA SIN SELECCIONAR VIAJE, SE ENVIARÁ UN AVISO EN EL PANEL
-        let formularioCompleto = document.getElementById('contenedorFormulario');
-        formularioCompleto.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px;">
-                <i class="fas fa-shopping-cart" style="font-size: 3.5rem; color: #ccc; margin-bottom: 20px;"></i>
-                <h3 style="color: var(--blue-dark); margin-bottom: 10px;">Tu carrito está vacío</h3>
-                <p style="color: var(--text-muted); margin-bottom: 25px;">No has seleccionado ningún boleto de bus todavía.</p>
-                <a href="/pasajes" style="background-color: var(--blue-medium); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Ver pasajes disponibles</a>
-            </div>
-        `;
+    // INYECCIÓN DE TEXTOS EN LOS NODOS DEL TICKET DIGITAL (Efecto espejo)
+    if (compraData.origen) tOrigen.innerText = compraData.origen;
+    if (compraData.destino) tDestino.innerText = compraData.destino;
+    if (compraData.fecha) tFecha.innerText = compraData.fecha;
+    if (compraData.hora) tHora.innerText = compraData.hora;
+    if (compraData.empresa) tEmpresa.innerText = compraData.empresa;
+    if (compraData.precio) tPrecio.innerText = precioOriginal;
+
+    // INYECCIÓN DE VALORES EN EL CUADRO DE DETALLE DE TRANSACCIÓN
+    if (compraData.origen && compraData.destino) {
+        invRuta.innerText = `Pasaje: ${compraData.origen} a ${compraData.destino}`;
     }
+    invMontoBase.innerText = precioOriginal;
+    invMontoTotal.innerText = precioOriginal;
 
-    // MÁSCARA AUTOMÁTICA EN EL CAMPO DE NÚMERO DE TARJETA
-    let cardInput = document.getElementById('cardNumber');
-    if (cardInput) {
-        cardInput.addEventListener('input', (e) => {
-            let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let matches = v.match(/\d{4,16}/g);
-            let match = matches && matches[0] || '';
-            let parts = [];
+    // MANEJO E INTEGRACIÓN INTERACTIVA DE LA NUEVA CLASE DE DESCUENTOS
+    let btnAplicarPromo = document.getElementById('btnAplicarPromo');
+    let inputCodigoPromo = document.getElementById('codigoPromo');
+    let filaDescuento = document.getElementById('invoiceFilaDescuento');
+    let montoDescuentoTexto = document.getElementById('invoiceMontoDescuento');
 
-            for (let i = 0, len = match.length; i < len; i += 4) {
-                parts.push(match.substring(i, i + 4));
-            }
+    if (btnAplicarPromo && inputCodigoPromo) {
+        btnAplicarPromo.addEventListener('click', () => {
+            let codigoIngresado = inputCodigoPromo.value;
 
-            if (parts.length > 0) {
-                e.target.value = parts.join(' ');
+            // Creación del objeto basado en la nueva clase
+            let gestor = new GestorDescuentos(precioOriginal);
+            // Llamada interactiva al método de cálculo
+            let ahorro = gestor.calcularDescuento(codigoIngresado);
+
+            if (ahorro > 0) {
+                let nuevoTotal = precioOriginal - ahorro;
+
+                // Actualización en caliente de la interfaz y elementos gráficos de cobro
+                montoDescuentoTexto.innerText = ahorro.toFixed(2);
+                filaDescuento.classList.remove('oculto-promo');
+                invMontoTotal.innerText = nuevoTotal.toFixed(2);
+                tPrecio.innerText = nuevoTotal.toFixed(2); // Modifica también el boleto visual
+
+                alert(`🎉 ¡Cupón Aplicado! Se ha descontado Bs ${ahorro.toFixed(2)} a tu saldo.`);
             } else {
-                e.target.value = v;
+                alert("❌ El código ingresado no es válido o ya caducó.");
+                filaDescuento.classList.add('oculto-promo');
+                invMontoTotal.innerText = precioOriginal;
+                tPrecio.innerText = precioOriginal;
             }
         });
     }
 
-    // ESCUCHADORES DE EVENTO "CHANGE" PARA ALTERNAR EL MÉTODO DE PAGO
+    // GESTIÓN DE PESTAÑAS DE PAGO (TARJETA vs QR)
     let radioTarjeta = document.getElementById('radioTarjeta');
     let radioQR = document.getElementById('radioQR');
 
     if (radioTarjeta && radioQR) {
-        radioTarjeta.addEventListener('change', () => alternarMetodoPago('tarjeta'));
-        radioQR.addEventListener('change', () => alternarMetodoPago('qr'));
+        radioTarjeta.addEventListener('change', alternarPanelesPago);
+        radioQR.addEventListener('change', alternarPanelesPago);
     }
 
-    // ESCUCHADOR DE ENVÍO DE FORMULARIO
-    let formularioPago = document.getElementById('paymentForm');
-    if (formularioPago) {
-        formularioPago.addEventListener('submit', procesarFormularioPago);
+    // CAPTURA DEL SUBMIT DEL FORMULARIO
+    let paymentForm = document.getElementById('paymentForm');
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', procesarFormularioPago);
     }
 });
- 
-// FUNCIÓN PARA CONMUTAR VISIBILIDAD ENTRE PANELES DE TARJETA Y QR 
-function alternarMetodoPago(tipo) {
+
+// FUNCIÓN PARA CAMBIAR VISUALMENTE ENTRE FORMULARIO DE TARJETA O QR
+function alternarPanelesPago() {
     let panelTarjeta = document.getElementById('panelTarjeta');
     let panelQR = document.getElementById('panelQR');
     let optCard = document.getElementById('optionCard');
     let optQR = document.getElementById('optionQR');
 
-    if (tipo === 'tarjeta') {
+    if (document.getElementById('radioTarjeta').checked) {
         panelTarjeta.classList.add('active');
         panelQR.classList.remove('active');
         optCard.classList.add('active');
@@ -116,19 +143,19 @@ function alternarMetodoPago(tipo) {
         optQR.classList.add('active');
     }
 }
- 
+
 // PROCESAMIENTO Y VALIDACIÓN FINAL DE LA COMPRA 
 function procesarFormularioPago(event) {
     event.preventDefault();
-    
-    let compraData = JSON.parse(localStorage.getItem('compraPendiente')) || {};
+
+    let totalPagarActual = document.getElementById('invoiceMontoTotal').innerText;
     let email = document.getElementById('emailPasajero').value;
     let nombre = document.getElementById('nombrePasajero').value;
     let metodo = document.querySelector('input[name="paymentMethod"]:checked').value;
 
     if (metodo === 'tarjeta') {
         let nro = document.getElementById('cardNumber').value;
-        if (nro.length < 12) {
+        if (nro.replace(/\s+/g, '').length < 12) {
             alert('Por favor ingrese un número de tarjeta válido.');
             return;
         }
@@ -136,12 +163,12 @@ function procesarFormularioPago(event) {
 
     // ALERTAS DE ÉXITO ADAPTATIVAS SEGÚN EL MEDIO ELEGIDO
     if (metodo === 'tarjeta') {
-        alert(`✅ ¡Pago Procesado Exitosamente!\n\nEstimado(a) ${nombre}, el cobro de Bs ${compraData.precio || 0} se realizó correctamente.\nTu boleto digital con código QR de embarque fue enviado a: ${email}`);
+        alert(`¡Pago Procesado Exitosamente!\n\nEstimado(a) ${nombre}, el cobro de Bs ${totalPagarActual} se realizó correctamente.\nTu boleto digital con código QR de embarque fue enviado a: ${email}`);
     } else {
-        alert(`📲 ¡Código QR Generado!\n\nSe ha creado la orden de cobro en tu cuenta bancaria. Al aprobarla desde tu app móvil, tu pasaje digital se activará y llegará a: ${email}`);
+        alert(`¡Código QR Generado!\n\nSe ha creado la orden de cobro por Bs ${totalPagarActual}. Al aprobarla desde tu app móvil bancaria se emitirá el pasaje a: ${email}`);
     }
 
-    // LIMPIEZA DE DATOS Y REDIRECCIÓN AL MENÚ PRINCIPAL
-    localStorage.removeItem('compraPendiente');
+    // Limpieza de memoria temporal y redirección de vuelta al home indexado
+    localStorage.clear();
     window.location.href = '/';
 }
