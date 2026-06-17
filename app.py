@@ -1,77 +1,102 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import json
-from datetime import datetime
+import tkinter as tk
+from tkinter import messagebox
+import customtkinter as ctk
 
-app = Flask(__name__)
-app.secret_key = "plusbus_secret_key_2026"
+# --- CONFIGURACIÓN GLOBAL DE ESTILOS ---
+COLOR_BLUE_DARK = "#0f2d59"     # Azul oscuro institucional (Sidebar / Login)
+COLOR_BLUE_MEDIUM = "#1d4ed8"   # Azul medio para énfasis y botones secundarios
+COLOR_BLUE_LIGHT = "#dbeafe"    # Azul claro para badges/etiquetas
+COLOR_ORANGE = "#f97316"        # Naranja primario para botones de acción y precios
+COLOR_BG_LIGHT = "#f8fafc"      # Fondo gris claro limpio para las vistas
+COLOR_WHITE = "#ffffff"         # Blanco para tarjetas y contenedores de datos
+COLOR_TEXT_DARK = "#1e293b"     # Gris oscuro para legibilidad de textos
+COLOR_TEXT_MUTED = "#64748b"    # Gris apagado para etiquetas secundarias
 
-# Datos de viajes (simulados)
-viajes_ejemplo = [
-    {"id": 1, "empresa": "Trans Copacabana", "origen": "La Paz", "destino": "Cochabamba", 
-     "fecha_salida": "2025-05-20", "hora_salida": "08:00", "duracion": "6h", 
-     "precio": 80, "asientos_disponibles": 15, "imagen": "https://i.imgur.com/6b3qXJK.png"},
-    {"id": 2, "empresa": "Flota Bolívar", "origen": "La Paz", "destino": "Santa Cruz", 
-     "fecha_salida": "2025-05-20", "hora_salida": "14:30", "duracion": "12h", 
-     "precio": 150, "asientos_disponibles": 8, "imagen": "https://i.imgur.com/6b3qXJK.png"},
-    {"id": 3, "empresa": "Expreso Sucre", "origen": "Cochabamba", "destino": "Santa Cruz", 
-     "fecha_salida": "2025-05-21", "hora_salida": "22:00", "duracion": "8h", 
-     "precio": 100, "asientos_disponibles": 22, "imagen": "https://i.imgur.com/6b3qXJK.png"},
-    {"id": 4, "empresa": "Transporte Potosí", "origen": "Potosí", "destino": "Sucre", 
-     "fecha_salida": "2025-05-22", "hora_salida": "07:30", "duracion": "3h", 
-     "precio": 45, "asientos_disponibles": 30, "imagen": "https://i.imgur.com/6b3qXJK.png"},
-    {"id": 5, "empresa": "Andina Tours", "origen": "La Paz", "destino": "Tarija", 
-     "fecha_salida": "2025-05-23", "hora_salida": "10:00", "duracion": "14h", 
-     "precio": 180, "asientos_disponibles": 5, "imagen": "https://i.imgur.com/6b3qXJK.png"},
-    {"id": 6, "empresa": "Oriente Bus", "origen": "Santa Cruz", "destino": "Trinidad", 
-     "fecha_salida": "2025-05-24", "hora_salida": "09:00", "duracion": "7h", 
-     "precio": 90, "asientos_disponibles": 12, "imagen": "https://i.imgur.com/6b3qXJK.png"},
-]
+# Configuración inicial del tema base de CustomTkinter
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+class PlusBusApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        
+        # Parámetros de la ventana principal
+        self.title("PlusBus Bolivia - Sistema de Gestión Autónoma")
+        self.geometry("1100x650")
+        self.configure(fg_color=COLOR_BG_LIGHT)
+        
+        # --- ESTADO CENTRALIZADO ---
+        self.viajes_data = [
+            {"id": 1, "empresa": "Flota El Dorado", "origen": "La Paz", "destino": "Cochabamba", "precio": 90, "hora": "08:30", "fecha": "2026-06-20"},
+            {"id": 2, "empresa": "Trans Copacabana", "origen": "Cochabamba", "destino": "Santa Cruz", "precio": 130, "hora": "22:00", "fecha": "2026-06-21"},
+            {"id": 3, "empresa": "Bolívar", "origen": "La Paz", "destino": "Oruro", "precio": 35, "hora": "14:15", "fecha": "2026-06-20"},
+            {"id": 4, "empresa": "Flota Cosmos", "origen": "Sucre", "destino": "Potosí", "precio": 25, "hora": "10:00", "fecha": "2026-06-22"}
+        ]
+        self.busqueda_rapida = {}
+        self.compra_pendiente = {}
+        self.usuario_autenticado = False
 
-@app.route('/pasajes')
-def pasajes():
-    return render_template('pasajes.html', viajes=viajes_ejemplo)
+        # --- ARQUITECTURA DE CONTENEDORES ---
+        # Menú Lateral (Inicialmente oculto por Login)
+        self.sidebar = ctk.CTkFrame(self, width=260, corner_radius=0, fg_color=COLOR_BLUE_DARK)
+        
+        # Contenedor derecho para las páginas dinámicas
+        self.main_container = ctk.CTkFrame(self, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.main_container.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
+        self.main_container.grid_rowconfigure(0, weight=1)
+        self.main_container.grid_columnconfigure(0, weight=1)
 
-@app.route('/pago')
-def pago():
-    return render_template('pago.html')
+        self.inicializar_vistas()
 
-@app.route('/turismo')
-def turismo():
-    return render_template('turismo.html')
+    def inicializar_vistas(self):
+        self.frames = {}
+        
+        # Incluye LoginView dentro del diccionario de control de navegación
+        for PageClass in (LoginView, InicioView, PasajesView, PagoView, TurismoView):
+            page_name = PageClass.__name__
+            frame = PageClass(parent=self.main_container, controller=self)
+            self.frames[page_name] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+            
+        # Fuerza la carga obligatoria de la pantalla de inicio de sesión
+        self.show_frame("LoginView")
 
-@app.route('/buscar', methods=['POST'])
-def buscar():
-    data = request.get_json()
-    origen = data.get('origen', '')
-    destino = data.get('destino', '')
-    fecha = data.get('fecha', '')
-    
-    resultados = [v for v in viajes_ejemplo 
-                  if (origen == '' or v['origen'].lower() == origen.lower())
-                  and (destino == '' or v['destino'].lower() == destino.lower())
-                  and (fecha == '' or v['fecha_salida'] == fecha)]
-    
-    resultados.sort(key=lambda x: x['hora_salida'])
-    return jsonify(resultados)
+    def activar_interfaz_principal(self):
+        """Muestra el sidebar de navegación tras un inicio de sesión exitoso."""
+        self.usuario_autenticado = True
+        self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        self.dibujar_sidebar()
+        self.show_frame("InicioView")
 
-@app.route('/buscar-global', methods=['POST'])
-def buscar_global():
-    query = request.get_json().get('query', '').lower()
-    resultados = [v for v in viajes_ejemplo 
-                  if query in v['origen'].lower() or 
-                     query in v['destino'].lower() or
-                     query in v['empresa'].lower()]
-    return jsonify(resultados)
+    def dibujar_sidebar(self):
+        # Limpieza de widgets previos para evitar duplicación de memoria
+        for widget in self.sidebar.winfo_children():
+            widget.destroy()
 
-@app.route('/procesar-pago', methods=['POST'])
-def procesar_pago():
-    data = request.get_json()
-    # Simular procesamiento exitoso
-    return jsonify({"success": True, "mensaje": "Pago procesado correctamente. Ticket enviado a tu correo."})
+        logo_label = ctk.CTkLabel(self.sidebar, text="🚌 PlusBus", font=("Inter", 24, "bold"), text_color=COLOR_WHITE)
+        logo_label.pack(pady=35, padx=20, anchor="w")
+        
+        self.btn_inicio = ctk.CTkButton(self.sidebar, text="🏠   Inicio", font=("Inter", 14, "bold"), fg_color="transparent", text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, height=45, anchor="w", command=lambda: self.show_frame("InicioView"))
+        self.btn_inicio.pack(fill=tk.X, padx=15, pady=5)
+        
+        self.btn_pasajes = ctk.CTkButton(self.sidebar, text="🎫   Pasajes", font=("Inter", 14, "bold"), fg_color="transparent", text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, height=45, anchor="w", command=lambda: self.show_frame("PasajesView"))
+        self.btn_pasajes.pack(fill=tk.X, padx=15, pady=5)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+        self.btn_pago = ctk.CTkButton(self.sidebar, text="💳   Pagar Ticket", font=("Inter", 14, "bold"), fg_color="transparent", text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, height=45, anchor="w", command=lambda: self.show_frame("PagoView"))
+        self.btn_pago.pack(fill=tk.X, padx=15, pady=5)
+        
+        self.btn_turismo = ctk.CTkButton(self.sidebar, text="🗺️   Guía Turismo", font=("Inter", 14, "bold"), fg_color="transparent", text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, height=45, anchor="w", command=lambda: self.show_frame("TurismoView"))
+        self.btn_turismo.pack(fill=tk.X, padx=15, pady=5)
+
+    def show_frame(self, page_name):
+        # Bloqueo de seguridad: Si no está autenticado, no permite cambiar de vista
+        if not self.usuario_autenticado and page_name != "LoginView":
+            print("Acceso denegado: Autenticación requerida.")
+            return
+
+        frame = self.frames.get(page_name)
+        if frame:
+            frame.tkraise()
+            if hasattr(frame, "al_mostrar_vista"):
+                frame.al_mostrar_vista()
