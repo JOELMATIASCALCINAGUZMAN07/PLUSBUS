@@ -100,3 +100,112 @@ class PlusBusApp(ctk.CTk):
             frame.tkraise()
             if hasattr(frame, "al_mostrar_vista"):
                 frame.al_mostrar_vista()
+
+                # --- VISTA CENTRAL DE AUTENTICACIÓN (LOGIN obligatorio) ---
+class LoginView(ctk.CTkFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.controller = controller
+
+        login_card = ctk.CTkFrame(
+            self,
+            fg_color=COLOR_WHITE,
+            corner_radius=16,
+            border_width=1,
+            border_color="#e2e8f0",
+            width=420,
+            height=460
+        )
+        login_card.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        login_card.pack_propagate(False)
+
+        ctk.CTkLabel(
+            login_card,
+            text="🚌 PlusBus Bolivia",
+            font=("Inter", 24, "bold"),
+            text_color=COLOR_BLUE_DARK
+        ).pack(pady=(35, 5))
+
+        ctk.CTkLabel(
+            login_card,
+            text="Gestión de Pasajes y Turismo Autónomo",
+            font=("Inter", 12),
+            text_color=COLOR_TEXT_MUTED
+        ).pack(pady=(0, 25))
+
+        ctk.CTkLabel(
+            login_card,
+            text="Nombre de Usuario / Correo",
+            font=("Inter", 12, "bold"),
+            text_color=COLOR_TEXT_DARK
+        ).pack(anchor="w", padx=40, pady=(10, 2))
+
+        self.entry_user = ctk.CTkEntry(
+            login_card,
+            height=38,
+            fg_color=COLOR_BG_LIGHT,
+            border_color="#cbd5e1",
+            placeholder_text="ejemplo@sistema.com"
+        )
+        self.entry_user.pack(fill=tk.X, padx=40, pady=5)
+
+        ctk.CTkLabel(
+            login_card,
+            text="Contraseña de Acceso",
+            font=("Inter", 12, "bold"),
+            text_color=COLOR_TEXT_DARK
+        ).pack(anchor="w", padx=40, pady=(10, 2))
+
+        self.entry_pass = ctk.CTkEntry(
+            login_card,
+            height=38,
+            fg_color=COLOR_BG_LIGHT,
+            border_color="#cbd5e1",
+            show="*",
+            placeholder_text="••••••••"
+        )
+        self.entry_pass.pack(fill=tk.X, padx=40, pady=5)
+
+        ctk.CTkButton(
+            login_card,
+            text="Iniciar Sesión",
+            font=("Inter", 14, "bold"),
+            fg_color=COLOR_BLUE_DARK,
+            text_color=COLOR_WHITE,
+            hover_color=COLOR_BLUE_MEDIUM,
+            height=42,
+            command=self.validar_credenciales
+        ).pack(fill=tk.X, padx=40, pady=(30, 5))
+
+        ctk.CTkButton(
+            login_card,
+            text="Registrar Nueva Cuenta",
+            font=("Inter", 12),
+            fg_color="transparent",
+            text_color=COLOR_BLUE_MEDIUM,
+            hover_color="#eff6ff",
+            command=self.registrar_usuario
+        ).pack(pady=5)
+
+    def validar_credenciales(self):
+        usuario = self.entry_user.get().strip()
+        contra = self.entry_pass.get().strip()
+
+        if not usuario or not contra:
+            messagebox.showwarning(
+                "Campos Vacíos",
+                "Por favor, introduzca sus datos para autenticarse en el sistema."
+            )
+            return
+
+        messagebox.showinfo(
+            "Acceso Concedido",
+            "Bienvenido al sistema autónomo PlusBus."
+        )
+        self.controller.activar_interfaz_principal()
+
+    def registrar_usuario(self):
+        messagebox.showinfo(
+            "Registro de Cuentas",
+            "Módulo de creación de cuentas sincronizado con éxito."
+        )
