@@ -254,3 +254,70 @@ class InicioView(ctk.CTkFrame):
             "destino": self.destino_var.get().strip()
         }
         self.controller.show_frame("PasajesView")
+
+        # --- PÁGINA 2: LISTADO DE SALIDAS ---
+class PasajesView(ctk.CTkFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.controller = controller
+        
+        self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.header_frame.pack(fill=tk.X, padx=30, pady=(30, 10))
+        
+        self.titulo_label = ctk.CTkLabel(self.header_frame, text="Resultados de Salidas Disponibles", font=("Inter", 22, "bold"), text_color=COLOR_BLUE_DARK)
+        self.titulo_label.pack(side=tk.LEFT)
+        
+        self.contador_label = ctk.CTkLabel(self.header_frame, text="0 flotas encontradas", font=("Inter", 12, "bold"), fg_color=COLOR_BLUE_LIGHT, text_color=COLOR_BLUE_MEDIUM, corner_radius=6, height=26, padx=10)
+        self.contador_label.pack(side=tk.RIGHT)
+        
+        self.scroll_container = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.scroll_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=10)
+
+    def al_mostrar_vista(self):
+        for widget in self.scroll_container.winfo_children():
+            widget.destroy()
+            
+        filtro = self.controller.busqueda_rapida
+        
+        if filtro:
+            viajes_filtrados = [
+                v for v in self.controller.viajes_data 
+                if filtro["origen"].lower() in v["origen"].lower() and 
+                   filtro["destino"].lower() in v["destino"].lower()
+            ]
+        else:
+            viajes_filtrados = self.controller.viajes_data
+
+        self.contador_label.configure(text=f"{len(viajes_filtrados)} flotas encontradas")
+
+        if not viajes_filtrados:
+            no_results = ctk.CTkLabel(self.scroll_container, text="❌ No se encontraron flotas para la ruta seleccionada.", font=("Inter", 14), text_color=COLOR_TEXT_MUTED)
+            no_results.pack(pady=40)
+            return
+
+        for viaje in viajes_filtrados:
+            card = ctk.CTkFrame(self.scroll_container, fg_color=COLOR_WHITE, corner_radius=10, border_width=1, border_color="#e2e8f0", height=100)
+            card.pack(fill=tk.X, pady=8, padx=5)
+            
+            info_frame = ctk.CTkFrame(card, fg_color="transparent")
+            info_frame.pack(side=tk.LEFT, padx=20, pady=15, fill=tk.BOTH, expand=True)
+            
+            ctk.CTkLabel(info_frame, text=viaje["empresa"], font=("Inter", 16, "bold"), text_color=COLOR_BLUE_DARK).grid(row=0, column=0, sticky="w")
+            
+            ruta_texto = f"📍 Ruta: {viaje['origen']} ➔ {viaje['destino']}"
+            ctk.CTkLabel(info_frame, text=ruta_texto, font=("Inter", 12), text_color=COLOR_TEXT_DARK).grid(row=1, column=0, sticky="w", pady=(2, 0))
+            
+            horario_texto = f"📅 {viaje['fecha']}  |  🕒 Salida: {viaje['hora']}"
+            ctk.CTkLabel(info_frame, text=horario_texto, font=("Inter", 11), text_color=COLOR_TEXT_MUTED).grid(row=2, column=0, sticky="w")
+            
+            action_frame = ctk.CTkFrame(card, fg_color="transparent")
+            action_frame.pack(side=tk.RIGHT, padx=20, pady=15, fill=tk.Y)
+            
+            ctk.CTkLabel(action_frame, text=f"Bs {viaje['precio']}", font=("Inter", 20, "bold"), text_color=COLOR_ORANGE).pack(anchor="e")
+            
+            btn_comprar = ctk.CTkButton(action_frame, text="Seleccionar", font=("Inter", 12, "bold"), fg_color=COLOR_BLUE_DARK, text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, width=100, height=32, command=lambda v=viaje: self.ir_a_pagar(v))
+            btn_comprar.pack(pady=(5, 0))
+
+    def ir_a_pagar(self, viaje):
+        self.controller.compra_pendiente = viaje
+        self.controller.show_frame("PagoView")
