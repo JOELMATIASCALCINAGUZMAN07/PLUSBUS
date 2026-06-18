@@ -321,3 +321,90 @@ class PasajesView(ctk.CTkFrame):
     def ir_a_pagar(self, viaje):
         self.controller.compra_pendiente = viaje
         self.controller.show_frame("PagoView")
+
+
+# --- PÁGINA 3: PROCESAMIENTO DE PAGO ÚNICO POR TARJETA ---
+class PagoView(ctk.CTkFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.controller = controller
+        
+        ctk.CTkLabel(self, text="Completar Pago Seguro", font=("Inter", 24, "bold"), text_color=COLOR_BLUE_DARK).pack(pady=(30, 10), padx=30, anchor="w")
+        
+        self.grid_container = ctk.CTkFrame(self, fg_color="transparent")
+        self.grid_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=10)
+        self.grid_container.grid_columnconfigure(0, weight=1, uniform="group1") 
+        self.grid_container.grid_columnconfigure(1, weight=1, uniform="group1") 
+        self.grid_container.grid_rowconfigure(0, weight=1)
+        
+        # --- COLUMNA 1: FORMULARIO ---
+        form_side = ctk.CTkFrame(self.grid_container, fg_color=COLOR_WHITE, corner_radius=12, border_width=1, border_color="#e5e7eb")
+        form_side.grid(row=0, column=0, sticky="nsew", padx=(0, 15), pady=10)
+        
+        form_inner = ctk.CTkFrame(form_side, fg_color="transparent")
+        form_inner.pack(fill=tk.BOTH, expand=True, padx=25, pady=25)
+        
+        ctk.CTkLabel(form_inner, text="Datos del Pasajero", font=("Inter", 16, "bold"), text_color=COLOR_BLUE_DARK).pack(anchor="w", pady=(0, 15))
+        
+        ctk.CTkLabel(form_inner, text="Nombre Completo", font=("Inter", 12, "bold"), text_color=COLOR_TEXT_DARK).pack(anchor="w", pady=(5, 2))
+        self.entry_nombre = ctk.CTkEntry(form_inner, height=38, fg_color=COLOR_BG_LIGHT, border_color="#cbd5e1")
+        self.entry_nombre.pack(fill=tk.X, pady=(0, 15))
+        
+        ctk.CTkLabel(form_inner, text="Correo Electrónico", font=("Inter", 12, "bold"), text_color=COLOR_TEXT_DARK).pack(anchor="w", pady=(5, 2))
+        self.entry_email = ctk.CTkEntry(form_inner, height=38, fg_color=COLOR_BG_LIGHT, border_color="#cbd5e1")
+        self.entry_email.pack(fill=tk.X, pady=(0, 20))
+        
+        # Canal unificado: Se removió la opción de QR
+        ctk.CTkLabel(form_inner, text="Método de Pago Autorizado", font=("Inter", 14, "bold"), text_color=COLOR_BLUE_DARK).pack(anchor="w", pady=(5, 8))
+        
+        self.lbl_metodo_unico = ctk.CTkLabel(form_inner, text="💳  Tarjeta de Crédito / Débito (Procesamiento Inmediato)", font=("Inter", 12, "bold"), text_color=COLOR_BLUE_MEDIUM)
+        self.lbl_metodo_unico.pack(anchor="w", pady=6)
+        
+        # --- COLUMNA 2: RESUMEN / BOLETO DIGITAL ---
+        self.ticket_side = ctk.CTkFrame(self.grid_container, fg_color=COLOR_BLUE_DARK, corner_radius=12)
+        self.ticket_side.grid(row=0, column=1, sticky="nsew", padx=(15, 0), pady=10)
+        
+        ticket_inner = ctk.CTkFrame(self.ticket_side, fg_color="transparent")
+        ticket_inner.pack(fill=tk.BOTH, expand=True, padx=25, pady=25)
+        
+        self.ticket_titulo = ctk.CTkLabel(ticket_inner, text="🎫 Ticket Digital", font=("Inter", 18, "bold"), text_color=COLOR_WHITE)
+        self.ticket_titulo.pack(anchor="w", pady=(0, 15))
+        
+        self.ticket_info = ctk.CTkLabel(ticket_inner, text="No hay ningún viaje seleccionado.", font=("Inter", 13), text_color=COLOR_BLUE_LIGHT, justify="left", anchor="w")
+        self.ticket_info.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        self.btn_pagar = ctk.CTkButton(ticket_inner, text="Confirmar Transacción", font=("Inter", 14, "bold"), fg_color=COLOR_ORANGE, text_color=COLOR_WHITE, hover_color="#ea580c", height=45, command=self.procesar_pago)
+        self.btn_pagar.pack(fill=tk.X, pady=(15, 0))
+
+    def al_mostrar_vista(self):
+        compra = self.controller.compra_pendiente
+        if compra:
+            resumen = f"Empresa:\n{compra['empresa']}\n\nOrigen:\n{compra['origen']}\n\nDestino:\n{compra['destino']}\n\nFecha y Hora:\n{compra['fecha']} - {compra['hora']}\n\n═══════════════════════\nMonto Total:  Bs {compra['precio']}"
+            self.ticket_info.configure(text=resumen)
+            self.btn_pagar.configure(state=tk.NORMAL, fg_color=COLOR_ORANGE)
+        else:
+            self.ticket_info.configure(text="⚠️ Tu orden está vacía.\nPor favor regresa a la sección de pasajes y escoge una salida.")
+            self.btn_pagar.configure(state=tk.DISABLED, fg_color="#94a3b8")
+
+    def procesar_pago(self):
+        nombre = self.entry_nombre.get().strip()
+        email = self.entry_email.get().strip()
+        compra = self.controller.compra_pendiente
+        
+        if not nombre or not email:
+            messagebox.showwarning("Campos Requeridos", "Por favor, complete sus datos de contacto para emitir el boleto.")
+            return
+        if not compra or 'precio' not in compra:
+            messagebox.showerror("Error de Compra", "No se ha seleccionado ningún viaje para procesar el pago.")
+            return
+            
+        msg = f"✅ ¡Pago Procesado Exitosamente!\n\nEstimado(a) {nombre}, el cobro de Bs {compra['precio']} se realizó correctamente a tu tarjeta.\nTu boleto digital con código QR de embarque fue enviado a: {email}"
+            
+        messagebox.showinfo("Transacción Exitosa", msg)
+        
+        self.entry_nombre.delete(0, tk.END)
+        self.entry_email.delete(0, tk.END)
+        self.controller.compra_pendiente = {}
+        self.controller.busqueda_rapida = {}
+        self.controller.show_frame("InicioView")
+
