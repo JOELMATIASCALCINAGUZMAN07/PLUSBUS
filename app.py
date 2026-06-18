@@ -101,7 +101,9 @@ class PlusBusApp(ctk.CTk):
             if hasattr(frame, "al_mostrar_vista"):
                 frame.al_mostrar_vista()
 
-                # --- VISTA CENTRAL DE AUTENTICACIÓN (LOGIN obligatorio) ---
+
+# --- VISTA CENTRAL DE AUTENTICACIÓN (LOGIN obligatorio) ---
+
 class LoginView(ctk.CTkFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
@@ -209,3 +211,46 @@ class LoginView(ctk.CTkFrame):
             "Registro de Cuentas",
             "Módulo de creación de cuentas sincronizado con éxito."
         )
+
+# --- PÁGINA 1: INICIO (BÚSQUEDA RÁPIDA) ---
+class InicioView(ctk.CTkFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.controller = controller
+        
+        ctk.CTkLabel(self, text="Busca tus pasajes en Bolivia", font=("Inter", 26, "bold"), text_color=COLOR_BLUE_DARK).pack(pady=(40, 5))
+        ctk.CTkLabel(self, text="Viaja de forma rápida, segura y completamente autónoma", font=("Inter", 14), text_color=COLOR_TEXT_MUTED).pack(pady=(0, 30))
+        
+        form_card = ctk.CTkFrame(self, fg_color=COLOR_WHITE, corner_radius=12, border_width=1, border_color="#e2e8f0", width=600, height=420)
+        form_card.pack(pady=20, padx=40)
+        form_card.pack_propagate(False)
+        
+        self.origen_var = tk.StringVar(value="La Paz")
+        self.destino_var = tk.StringVar(value="Cochabamba")
+        
+        ctk.CTkLabel(form_card, text="Ciudad de Origen", font=("Inter", 12, "bold"), text_color=COLOR_TEXT_DARK).pack(pady=(25, 2), padx=30, anchor="w")
+        self.entry_origen = ctk.CTkEntry(form_card, textvariable=self.origen_var, height=40, fg_color=COLOR_BG_LIGHT, text_color=COLOR_TEXT_DARK, border_color="#cbd5e1")
+        self.entry_origen.pack(fill=tk.X, padx=30, pady=5)
+        
+        self.btn_swap = ctk.CTkButton(form_card, text="🔄 Intercambiar Ciudades", font=("Inter", 11), fg_color="transparent", text_color=COLOR_BLUE_MEDIUM, hover_color="#eff6ff", width=150, command=self.swap_locations)
+        self.btn_swap.pack(pady=5)
+        
+        ctk.CTkLabel(form_card, text="Ciudad de Destino", font=("Inter", 12, "bold"), text_color=COLOR_TEXT_DARK).pack(pady=(5, 2), padx=30, anchor="w")
+        self.entry_destino = ctk.CTkEntry(form_card, textvariable=self.destino_var, height=40, fg_color=COLOR_BG_LIGHT, text_color=COLOR_TEXT_DARK, border_color="#cbd5e1")
+        self.entry_destino.pack(fill=tk.X, padx=30, pady=5)
+        
+        btn_buscar = ctk.CTkButton(form_card, text="Buscar Flotas Disponibles", font=("Inter", 14, "bold"), fg_color=COLOR_ORANGE, text_color=COLOR_WHITE, hover_color="#ea580c", height=45, command=self.buscar_viaje)
+        btn_buscar.pack(fill=tk.X, padx=30, pady=25)
+
+    def swap_locations(self):
+        ori = self.origen_var.get()
+        des = self.destino_var.get()
+        self.origen_var.set(des)
+        self.destino_var.set(ori)
+
+    def buscar_viaje(self):
+        self.controller.busqueda_rapida = {
+            "origen": self.origen_var.get().strip(),
+            "destino": self.destino_var.get().strip()
+        }
+        self.controller.show_frame("PasajesView")
