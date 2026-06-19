@@ -408,3 +408,53 @@ class PagoView(ctk.CTkFrame):
         self.controller.busqueda_rapida = {}
         self.controller.show_frame("InicioView")
 
+        # --- PÁGINA 4: GUÍA DE TURISMO DE BOLIVIA (CON CONTENEDORES IMÁGENES) ---
+class TurismoView(ctk.CTkFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.controller = controller
+        
+        ctk.CTkLabel(self, text="Descubre Bolivia con PlusBus", font=("Inter", 24, "bold"), text_color=COLOR_BLUE_DARK).pack(pady=(30, 5), padx=30, anchor="w")
+        ctk.CTkLabel(self, text="Conoce los destinos emblemáticos a los que puedes viajar con nuestras flotas", font=("Inter", 13), text_color=COLOR_TEXT_MUTED).pack(pady=(0, 15), padx=30, anchor="w")
+        
+        self.scroll_turismo = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.scroll_turismo.pack(fill=tk.BOTH, expand=True, padx=30, pady=10)
+        
+        # Dataset actualizado incorporando los identificadores e iconos visuales como recurso
+        destinos = [
+            {"titulo": "Salar de Uyuni (Potosí)", "desc": "El desierto de sal continuo más grande y alto del mundo. Un espejo natural infinito durante la época de lluvias.", "cat": "Altiplano", "img_placeholder": "🖼️ [FOTOGRAFÍA: SALAR DE UYUNI INFINTIO]"},
+            {"titulo": "Cochabamba - Ciudad Jardín", "desc": "El corazón de Bolivia. Famosa por su gastronomía insuperable, clima templado y el imponente Cristo de la Concordia.", "cat": "Valles", "img_placeholder": "🖼️ [FOTOGRAFÍA: PAISAJE CRISTO DE LA CONCORDIA Y VALLES]"},
+            {"titulo": "Tiahuanaco (La Paz)", "desc": "Cuna de una de las civilizaciones prehispánicas más longevas y avanzadas de América del Sur. Misterio arqueológico ancestral.", "cat": "Altiplano", "img_placeholder": "🖼️ [FOTOGRAFÍA: PUERTA DEL SOL - RUINAS TIAHUANACO]"},
+            {"titulo": "Amazonía Indómita (Pando)", "desc": "El rincón salvaje y verde de Bolivia. Cubierto por densas selvas tropicales y ríos caudalosos ideales para la aventura.", "cat": "Llanos", "img_placeholder": "🖼️ [FOTOGRAFÍA: RESERVA NATURAL AMAZÓNICA - PANDO]"}
+        ]
+        
+        for dest in destinos:
+            card = ctk.CTkFrame(self.scroll_turismo, fg_color=COLOR_WHITE, corner_radius=12, border_width=1, border_color="#e2e8f0")
+            card.pack(fill=tk.X, pady=12, padx=5)
+            
+            # --- COMPONENTE VISUAL: Marco contenedor de Imagen ---
+            img_frame = ctk.CTkFrame(card, height=140, fg_color="#cbd5e1", corner_radius=8)
+            img_frame.pack(fill=tk.X, padx=12, pady=(12, 4))
+            img_frame.pack_propagate(False)
+            
+            lbl_img = ctk.CTkLabel(img_frame, text=dest["img_placeholder"], font=("Inter", 12, "bold"), text_color=COLOR_BLUE_DARK)
+            lbl_img.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            
+            # --- COMPONENTE TEXTUAL: Datos informativos ---
+            card_inner = ctk.CTkFrame(card, fg_color="transparent")
+            card_inner.pack(fill=tk.X, padx=15, pady=(4, 15))
+            
+            top_frame = ctk.CTkFrame(card_inner, fg_color="transparent")
+            top_frame.pack(fill=tk.X)
+            
+            ctk.CTkLabel(top_frame, text=dest["titulo"], font=("Inter", 16, "bold"), text_color=COLOR_BLUE_DARK).pack(side=tk.LEFT)
+            ctk.CTkLabel(top_frame, text=dest["cat"], font=("Inter", 10, "bold"), fg_color=COLOR_BLUE_LIGHT, text_color=COLOR_BLUE_MEDIUM, corner_radius=4, height=20, padx=8).pack(side=tk.RIGHT)
+            
+            desc_label = ctk.CTkLabel(card_inner, text=dest["desc"], font=("Inter", 12), text_color=COLOR_TEXT_DARK, justify="left", wraplength=680)
+            desc_label.pack(anchor="w", pady=(10, 0), fill=tk.X)
+
+
+if __name__ == "__main__":
+    app = PlusBusApp()
+    app.mainloop()
+
