@@ -1,7 +1,11 @@
 # Sistema de Gestión Autónoma de Pasajes y Turismo - PlusBus Bolivia
+
+# Importación de CustomTkinter para una interfaz moderna y atractiva, junto con módulos estándar como re para validación de entradas y random para generar datos de prueba. CustomTkinter se utiliza para crear una experiencia de usuario más agradable y profesional, con estilos personalizados que reflejan la identidad visual de PlusBus Bolivia.
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
+import re
+import random 
 
 #CONFIGURACIÓN GLOBAL DE ESTILOS
 
@@ -28,15 +32,27 @@ class PlusBusApp(ctk.CTk):
         self.geometry("1100x650")
         self.configure(fg_color=COLOR_BG_LIGHT)
         
-        # ESTADO CENTRALIZADO
+        # ESTADO CENTRALIZADO  
+        # Este estado centralizado se utiliza para almacenar información relevante sobre los viajes disponibles, el historial de compras de la sesión, los usuarios registrados y el estado de autenticación. Al centralizar esta información en el controlador principal, se facilita la gestión de datos entre las diferentes vistas del sistema autónomo PlusBus, permitiendo una experiencia de usuario coherente y fluida a medida que navegan por las distintas secciones de la aplicación.
         self.viajes_data = [
-            {"id": 1, "empresa": "Flota El Dorado", "origen": "La Paz", "destino": "Cochabamba", "precio": 90, "hora": "08:30", "fecha": "2026-06-20"},
-            {"id": 2, "empresa": "Trans Copacabana", "origen": "Cochabamba", "destino": "Santa Cruz", "precio": 130, "hora": "22:00", "fecha": "2026-06-21"},
-            {"id": 3, "empresa": "Bolívar", "origen": "La Paz", "destino": "Oruro", "precio": 35, "hora": "14:15", "fecha": "2026-06-20"},
-            {"id": 4, "empresa": "Flota Cosmos", "origen": "Sucre", "destino": "Potosí", "precio": 25, "hora": "10:00", "fecha": "2026-06-22"},
-            {"id": 4, "empresa": "Flota Cosmos", "origen": "Sucre", "destino": "Potosí", "precio": 25, "hora": "10:00", "fecha": "2026-06-22"}
+            {"id": 1, "empresa": "Flota El Dorado", "origen": "La Paz", "destino": "Cochabamba", "precio": 90, "hora": "08:30", "fecha": "2026-06-20", "asientos_ocupados": [1, 2, 5, 12, 20]},
+            {"id": 2, "empresa": "Trans Copacabana", "origen": "Cochabamba", "destino": "Santa Cruz", "precio": 130, "hora": "22:00", "fecha": "2026-06-21", "asientos_ocupados": [10, 11, 14, 30]},
+            {"id": 3, "empresa": "Bolívar", "origen": "La Paz", "destino": "Oruro", "precio": 35, "hora": "14:15", "fecha": "2026-06-20", "asientos_ocupados": [3, 4, 7, 8, 9, 15]},
+            {"id": 4, "empresa": "Flota Cosmos", "origen": "Sucre", "destino": "Potosí", "precio": 25, "hora": "10:00", "fecha": "2026-06-22", "asientos_ocupados": [22, 23]}
         ]
+        
+        # Historial dinámico de transacciones de la sesión
+        self.historial_compras = []
 
+        # Base de datos local en memoria para usuarios registrados 
+        self.usuarios_registrados = {
+            "admin": "1234",
+            "invitado@plusbus.bo": "bolivia2026"
+        }
+        
+        # Estado de control de acceso
+        self.usuario_autenticado = False
+        
         # Variables de estado para la búsqueda rápida y la compra pendiente, que se utilizan para almacenar temporalmente la información ingresada por el usuario en la vista de inicio y la selección de viaje en la vista de pasajes, respectivamente. Estas variables permiten mantener un flujo de datos coherente entre las diferentes vistas del sistema autónomo PlusBus, facilitando la navegación y la experiencia de usuario.
         self.busqueda_rapida = {}
         self.compra_pendiente = {}
@@ -60,7 +76,7 @@ class PlusBusApp(ctk.CTk):
         self.frames = {}
         
         # Incluye LoginView dentro del diccionario de control de navegación
-        for PageClass in (LoginView, InicioView, PasajesView, PagoView, TurismoView):
+        for PageClass in (LoginView, InicioView, PasajesView, PagoView, TurismoView, HistorialView):
             page_name = PageClass.__name__
             frame = PageClass(parent=self.main_container, controller=self)
             self.frames[page_name] = frame
@@ -99,17 +115,23 @@ class PlusBusApp(ctk.CTk):
         self.btn_pago = ctk.CTkButton(self.sidebar, text="Pagar", font=("arial", 18, "bold"), fg_color="transparent", text_color=COLOR_WHITE, height=45, anchor="w", command=lambda: self.show_frame("PagoView"))
         self.btn_pago.pack(fill=tk.X, padx=15, pady=5)
         
+        # Botón de historial: Este botón permite a los usuarios acceder a la sección de historial, donde pueden ver un
+        self.btn_historial = ctk.CTkButton(self.sidebar, text="📜   Historial", font=("Inter", 18, "bold"), fg_color="transparent", text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, height=45, anchor="w", command=lambda: self.show_frame("HistorialView"))
+        self.btn_historial.pack(fill=tk.X, padx=15, pady=5)
+
         # Botón de turismo: Este botón permite a los usuarios acceder a la sección de turismo, donde pueden encontrar información sobre destinos turísticos en Bolivia y planificar sus viajes de manera autónoma. Al hacer clic en este botón, se activa la función "show_frame" con el nombre de la vista "TurismoView", lo que permite una navegación fluida hacia la sección de turismo. Este botón está diseñado con un color que resalta su función, facilitando así la experiencia de usuario al interactuar con el menú lateral.
         self.btn_turismo = ctk.CTkButton(self.sidebar, text="Guía", font=("arial", 18, "bold"), fg_color="transparent", text_color=COLOR_ORANGE,height=45, anchor="w", command=lambda: self.show_frame("TurismoView"))
         self.btn_turismo.pack(fill=tk.X, padx=15, pady=5)
 
-        # Botón de cierre de sesión: Este botón se encuentra al final del menú lateral y permite a los usuarios cerrar su sesión de manera segura. Al hacer clic en este botón, se restablece el estado de autenticación del usuario, se oculta el menú lateral y se redirige automáticamente a la pantalla de inicio de sesión (LoginView). Esto garantiza que el acceso a las funciones principales del sistema esté protegido y que los usuarios puedan gestionar su sesión de manera efectiva.
+    # Función para mostrar las diferentes vistas según la interacción del usuario: Esta función se encarga de gestionar la navegación entre las diferentes vistas del sistema autónomo PlusBus. Antes de mostrar una vista, se verifica si el usuario está autenticado; si no lo está y se intenta acceder a una vista diferente a la de inicio de sesión, se muestra un mensaje de acceso denegado. Si el usuario está autenticado o se accede a la vista de inicio de sesión, se muestra la vista correspondiente y, si la vista tiene una función específica para ejecutar al mostrarse (como actualizar datos o aplicar filtros), se llama a esa función para garantizar que la información mostrada esté actualizada y sea relevante para el usuario.
     def show_frame(self, page_name):
+        
         # Bloqueo de seguridad: Si no está autenticado, no permite cambiar de vista
         if not self.usuario_autenticado and page_name != "LoginView":
             print("Acceso denegado: Autenticación requerida.")
             return
-        # Navegación entre vistas: Esta función se encarga de mostrar la vista correspondiente al nombre de página solicitado. Si la vista tiene un método "al_mostrar_vista", se ejecuta para actualizar dinámicamente el contenido cada vez que se muestra la vista. Esto permite que las vistas se mantengan actualizadas con la información más reciente del estado centralizado del controlador.
+
+        # Navegación a la vista solicitada: Si el usuario está autenticado o se accede a la vista de inicio de sesión, se muestra la vista correspondiente. Además, si la vista tiene una función específica para ejecutar al mostrarse (como actualizar datos o aplicar filtros), se llama a esa función para garantizar que la información mostrada esté actualizada y sea relevante para el usuario.
         frame = self.frames.get(page_name)
         if frame:
             frame.tkraise()
@@ -217,32 +239,46 @@ class LoginView(ctk.CTkFrame):
             command=self.registrar_usuario
         ).pack(pady=5)
 
-        # En un sistema real, aquí se implementaría la lógica de autenticación contra una base de datos o servicio externo para verificar las credenciales ingresadas por el usuario. Para fines de demostración, se asume que cualquier combinación de usuario y contraseña es válida.
+        # Mensaje de prueba para facilitar el acceso rápido durante el desarrollo, indicando a los usuarios que pueden usar las credenciales "admin" y "1234" para iniciar sesión rápidamente. Este mensaje es útil para pruebas internas y puede ser eliminado o modificado en la versión final del sistema.
     def validar_credenciales(self):
         usuario = self.entry_user.get().strip()
         contra = self.entry_pass.get().strip()
 
-        # Validación de campos vacíos: Antes de proceder con la autenticación, se verifica que ambos campos (usuario y contraseña) no estén vacíos. Si alguno de los campos está vacío, se muestra una advertencia al usuario indicando que debe ingresar sus datos para autenticarse en el sistema. Esto ayuda a prevenir intentos de inicio de sesión sin proporcionar la información necesaria y mejora la experiencia del usuario al proporcionar retroalimentación clara sobre lo que se requiere para acceder al sistema.
+        # Validación de campos vacíos: Antes de verificar las credenciales, se realiza una validación para asegurarse de que los campos de usuario y contraseña no estén vacíos. Si alguno de los campos está vacío, se muestra un mensaje de advertencia indicando que ambos campos son necesarios para autenticarse en el sistema. Esta validación ayuda a mejorar la experiencia del usuario al proporcionar una guía clara sobre cómo proceder y evita intentos de inicio de sesión con información incompleta.
         if not usuario or not contra:
-            messagebox.showwarning(
-                "Campos Vacíos",
-                "Por favor, introduzca sus datos para autenticarse en el sistema."
-            )
+            messagebox.showwarning("Campos Vacíos", "Por favor, introduzca sus datos para autenticarse en el sistema.")
+            return
+
+         # Validación de credenciales: Esta función se encarga de verificar la información ingresada por el usuario en los campos de usuario y contraseña. Primero, se verifica que ambos campos no estén vacíos, mostrando un mensaje de advertencia si alguno de los campos está vacío. Luego, se verifica si el nombre de usuario ingresado existe en la base de datos local de usuarios registrados. Si el usuario existe, se compara la contraseña ingresada con la contraseña almacenada para ese usuario. Si las credenciales son correctas, se muestra un mensaje de bienvenida y se activa la interfaz principal del sistema autónomo PlusBus. Si las credenciales son incorrectas o el usuario no existe, se muestran mensajes de error correspondientes para informar al usuario sobre el problema.
+        if usuario in self.controller.usuarios_registrados:
+            if self.controller.usuarios_registrados[usuario] == contra:
+                messagebox.showinfo("Acceso Concedido", f"Bienvenido al sistema autónomo PlusBus, {usuario}.")
+                self.controller.activar_interfaz_principal()
+            else:
+                messagebox.showerror("Error de Acceso", "Contraseña incorrecta. Inténtelo de nuevo.")
+        else:
+            messagebox.showerror("Error de Acceso", "El usuario ingresado no existe. Regístrelo usando el botón inferior.")
+    
+    # la función "registrar_usuario" se encarga de manejar el proceso de registro de nuevos usuarios en el sistema autónomo PlusBus. Esta función realiza varias validaciones para garantizar la calidad de las cuentas registradas, como verificar que los campos de usuario y contraseña no estén vacíos, asegurarse de que la contraseña tenga un nivel mínimo de seguridad (al menos 4 caracteres) y comprobar que el nombre de usuario no esté duplicado en la base de datos local. Si todas las validaciones son exitosas, se registra la nueva cuenta en la base de datos local y se muestra un mensaje de confirmación al usuario.
+    def registrar_usuario(self):
+        usuario = self.entry_user.get().strip()
+        contra = self.entry_pass.get().strip()
+        
+        # Validación de campos vacíos y seguridad de contraseña: Antes de registrar una nueva cuenta, se verifica que los campos de usuario y contraseña no estén vacíos. Si alguno de los campos está vacío, se muestra un mensaje de advertencia indicando que ambos campos son requeridos para el registro. Además, se verifica que la contraseña tenga al menos 4 caracteres para garantizar un nivel mínimo de seguridad. Si la contraseña es demasiado corta, se muestra un mensaje de advertencia indicando que la contraseña debe tener por lo menos 4 caracteres. Estas validaciones ayudan a mejorar la calidad de las cuentas registradas y a proporcionar una experiencia de usuario más segura.
+        if not usuario or not contra:
+            messagebox.showwarning("Campos Requeridos", "Para registrar una cuenta, escriba el usuario y contraseña deseados en las cajas de texto superiores.")
             return
         
-        # Simulación de autenticación exitosa: En este ejemplo, se asume que cualquier combinación de usuario y contraseña es válida para fines de demostración. En un sistema real, aquí se implementaría la lógica de autenticación contra una base de datos o servicio externo para verificar las credenciales ingresadas por el usuario.
-        messagebox.showinfo(
-            "Acceso Concedido",
-            "Bienvenido al sistema autónomo PlusBus."
-        )
-        self.controller.activar_interfaz_principal()
+        if len(contra) < 4:
+            messagebox.showwarning("Seguridad Débil", "La contraseña debe tener por lo menos 4 caracteres.")
+            return
 
-        # En un sistema real, aquí se implementaría la lógica de autenticación contra una base de datos o servicio externo.
-    def registrar_usuario(self):
-        messagebox.showinfo(
-            "Registro de Cuentas",
-            "Módulo de creación de cuentas sincronizado con éxito."
-        )
+        # Verificación de usuario duplicado: Antes de registrar una nueva cuenta, se verifica si el nombre de usuario ingresado ya existe en la base de datos local de usuarios registrados. Si el usuario ya está registrado, se muestra un mensaje de advertencia indicando que el nombre de usuario ya está en uso y se sugiere intentar iniciar sesión en su lugar. Esto ayuda a prevenir la creación de cuentas duplicadas y mejora la experiencia del usuario al proporcionar una guía clara sobre cómo proceder.
+        if usuario in self.controller.usuarios_registrados:
+            messagebox.showwarning("Registro Duplicado", "Este nombre de usuario ya está registrado. Intente iniciar sesión.")
+        else:
+            self.controller.usuarios_registrados[usuario] = contra
+            messagebox.showinfo("Registro Exitoso", f"Cuenta para '{usuario}' guardada correctamente.\n¡Ya puede iniciar sesión!")
 
 #PÁGINA 1: INICIO
 #La vista de inicio se ha diseñado para ser la primera experiencia que el usuario tiene al ingresar al sistema. Aquí se presenta un formulario de búsqueda rápida que permite a los usuarios ingresar su ciudad de origen y destino para encontrar flotas disponibles. Además, se ha incluido un botón de intercambio para facilitar la corrección rápida de las ciudades ingresadas. Esta página actúa como el punto de partida para la navegación hacia la sección de pasajes, donde se mostrarán los resultados filtrados según la búsqueda realizada.
@@ -251,9 +287,11 @@ class InicioView(ctk.CTkFrame):
         super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
         self.controller = controller
         
+        # Estructura de la vista de inicio: Se ha diseñado una estructura clara y atractiva para la vista de inicio, que incluye un título principal, una breve descripción del sistema y un formulario de búsqueda rápida para que los usuarios puedan ingresar su ciudad de origen y destino. Además, se ha incluido un botón de intercambio para facilitar la corrección rápida de las ciudades ingresadas. Esta estructura permite a los usuarios comenzar su experiencia en el sistema autónomo PlusBus de manera intuitiva y eficiente.
         ctk.CTkLabel(self, text="Busca tus pasajes en Bolivia", font=("arial", 38, "bold"), text_color=COLOR_BLUE_DARK).pack(pady=(40, 5))
         ctk.CTkLabel(self, text="Viaja de forma rápida, segura y completamente autónoma", font=("Inter", 22), text_color=COLOR_TEXT_MUTED).pack(pady=(0, 30))
         
+        # Card de búsqueda rápida: Este card se ha diseñado para ser visualmente atractivo y funcional, con un fondo blanco, bordes redondeados y un diseño limpio que resalta los campos de entrada y el botón de búsqueda. El card está centrado en la pantalla para facilitar la interacción del usuario y se ha configurado con un tamaño fijo para mantener la consistencia visual. Dentro del card, se encuentran los campos de entrada para la ciudad de origen y destino, así como un botón de intercambio para facilitar la corrección rápida de las ciudades ingresadas. Esta sección actúa como el punto de partida para que los usuarios puedan buscar flotas disponibles según sus necesidades.
         form_card = ctk.CTkFrame(self, fg_color=COLOR_WHITE, corner_radius=35, border_width=1, border_color="#e2e8f0", width=570, height=360)
         form_card.pack(pady=20, padx=40)
         form_card.pack_propagate(False)
@@ -348,29 +386,49 @@ class PasajesView(ctk.CTkFrame):
             info_frame = ctk.CTkFrame(card, fg_color="transparent")
             info_frame.pack(side=tk.LEFT, padx=20, pady=15, fill=tk.BOTH, expand=True)
             
-            ctk.CTkLabel(info_frame, text=viaje["empresa"], font=("Inter", 21, "bold"), text_color=COLOR_BLUE_DARK).grid(row=0, column=0, sticky="w")
-            # Información de ruta y horario: Se muestra la ruta del viaje con un ícono de ubicación para resaltar visualmente la información, seguida del horario de salida con íconos de calendario y reloj para mejorar la legibilidad y comprensión rápida de los detalles del viaje.
-            ruta_texto = f"📍 Ruta: {viaje['origen']} ➔ {viaje['destino']}"
-            ctk.CTkLabel(info_frame, text=ruta_texto, font=("Inter", 18), text_color=COLOR_TEXT_DARK).grid(row=1, column=0, sticky="w", pady=(2, 0))
+            #Filtrado de Asientos Libres (Capacidad máxima estándar: 40 asientos)
+            asientos_libres = [str(n) for n in range(1, 41) if n not in viaje["asientos_ocupados"]]
             
-            horario_texto = f"📅 {viaje['fecha']}  |  🕒 Salida: {viaje['hora']}"
-            ctk.CTkLabel(info_frame, text=horario_texto, font=("Inter", 14), text_color=COLOR_TEXT_MUTED).grid(row=2, column=0, sticky="w")
+            # Información del viaje: Se muestra la empresa, ruta, horario y precio de cada viaje en un formato claro y organizado para facilitar la lectura por parte de los usuarios. Esto les permite comparar rápidamente las opciones disponibles y tomar decisiones informadas al seleccionar un viaje.
+            selector_frame = ctk.CTkFrame(card, fg_color="transparent")
+            selector_frame.pack(side=tk.RIGHT, padx=10, pady=15, fill=tk.Y)
             
-            # Componente de acción: Este componente se encuentra en el lado derecho de la tarjeta y se encarga de mostrar el precio del viaje de manera destacada, utilizando un color llamativo para resaltar la información. Además, incluye un botón de acción que permite a los usuarios seleccionar el viaje y proceder al pago, facilitando así la navegación hacia la siguiente etapa del proceso de compra.
+            # Información del viaje: Se muestra la empresa, ruta, horario y precio de cada viaje en un formato claro y organizado para facilitar la lectura por parte de los usuarios. Esto les permite comparar rápidamente las opciones disponibles y tomar decisiones informadas al seleccionar un viaje.
+            ctk.CTkLabel(selector_frame, text="Asiento:", font=("Inter", 11, "bold"), text_color=COLOR_TEXT_DARK).pack(anchor="w")
+            combo_asiento = ctk.CTkComboBox(selector_frame, values=asientos_libres, width=80, height=28, state="readonly")
+            combo_asiento.set(asientos_libres[0] if asientos_libres else "Lleno")
+            combo_asiento.pack(pady=2)
+            
+            # Información del viaje: Se muestra la empresa, ruta, horario y precio de cada viaje en un formato claro y organizado para facilitar la lectura por parte de los usuarios. Esto les permite comparar rápidamente las opciones disponibles y tomar decisiones informadas al seleccionar un viaje.
             action_frame = ctk.CTkFrame(card, fg_color="transparent")
-            action_frame.pack(side=tk.RIGHT, padx=20, pady=15, fill=tk.Y)
+            action_frame.pack(side=tk.RIGHT, padx=20, pady=10, fill=tk.Y)
             
-            ctk.CTkLabel(action_frame, text=f"Bs {viaje['precio']}", font=("Inter", 25, "bold"), padx=30,text_color=COLOR_ORANGE).pack(anchor="e")
+            ctk.CTkLabel(action_frame, text=f"Bs {viaje['precio']}", font=("Inter", 20, "bold"), text_color=COLOR_ORANGE).pack(anchor="e")
             
-            # Botón de selección: Al hacer clic en este botón, se almacena la información del viaje seleccionado en el estado centralizado del controlador bajo la clave "compra_pendiente" y luego se navega automáticamente a la vista de pago (PagoView) para que el usuario pueda completar la transacción. Esto crea un flujo de navegación intuitivo desde la selección del viaje hasta el proceso de pago, facilitando la experiencia de compra para los usuarios.
-            btn_comprar = ctk.CTkButton(action_frame, text="Seleccionar", font=("Inter", 16, "bold"), fg_color=COLOR_BLUE_DARK, text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM,corner_radius=35, width=100, height=32, command=lambda v=viaje: self.ir_a_pagar(v))
+            # Se vincula el combo_asiento a la función de transferencia
+            btn_comprar = ctk.CTkButton(action_frame, text="Seleccionar", font=("Inter", 12, "bold"), fg_color=COLOR_BLUE_DARK, text_color=COLOR_WHITE, hover_color=COLOR_BLUE_MEDIUM, width=100, height=32, command=lambda v=viaje, cb=combo_asiento: self.ir_a_pagar(v, cb))
             btn_comprar.pack(pady=(5, 0))
 
-# Función para manejar la selección de un viaje: Al hacer clic en el botón "Seleccionar" de una tarjeta de viaje, esta función se activa y se encarga de almacenar la información del viaje seleccionado en el estado centralizado del controlador bajo la clave "compra_pendiente". Luego, navega automáticamente a la vista de pago (PagoView) para que el usuario pueda completar la transacción. Esto crea un flujo de navegación intuitivo desde la selección del viaje hasta el proceso de pago, facilitando la experiencia de compra para los usuarios.
-    def ir_a_pagar(self, viaje):
-        self.controller.compra_pendiente = viaje
-        self.controller.show_frame("PagoView")
+            # Al hacer clic en el botón "Seleccionar", se activa la función "ir_a_pagar" que toma como parámetros el viaje seleccionado y el combo box de asientos. Esta función verifica si el asiento elegido está disponible y, si es así, empaqueta toda la información relevante del viaje junto con el asiento seleccionado en el estado centralizado del controlador bajo la clave "compra_pendiente". Luego, navega automáticamente a la vista de pago (PagoView) para que el usuario pueda completar la transacción. Si el asiento elegido no está disponible o no se ha seleccionado un asiento, se muestra un mensaje de advertencia al usuario.
 
+def ir_a_pagar(self, viaje, combo_asiento):
+        asiento_elegido = combo_asiento.get()
+        if asiento_elegido == "Lleno" or not asiento_elegido:
+            messagebox.showwarning("Sin Espacio", "Esta flota no dispone de asientos libres.")
+            return
+            
+        # Empaquetamos los parámetros lógicos incluyendo el asiento seleccionado
+        self.controller.compra_pendiente = {
+            "viaje_id": viaje["id"],
+            "empresa": viaje["empresa"],
+            "origen": viaje["origen"],
+            "destino": viaje["destino"],
+            "precio": viaje["precio"],
+            "hora": viaje["hora"],
+            "fecha": viaje["fecha"],
+            "asiento": int(asiento_elegido)
+        }
+        self.controller.show_frame("PagoView")
 
 #PÁGINA 3: PROCESAMIENTO DE PAGO ÚNICO POR TARJETA
 class PagoView(ctk.CTkFrame):
@@ -448,28 +506,44 @@ class PagoView(ctk.CTkFrame):
             self.ticket_info.configure(text="⚠️ Tu orden está vacía.\nPor favor regresa a la sección de pasajes y escoge una salida.")
             self.btn_pagar.configure(state=tk.DISABLED, fg_color="#94a3b8")
 
-    # Función para procesar el pago: Al hacer clic en el botón "Confirmar Transacción", esta función se activa y se encarga de recopilar los datos ingresados por el usuario, validar la información y mostrar un mensaje de confirmación de la transacción. Además, se actualiza el estado centralizado del controlador para reflejar que la compra ha sido procesada y se navega automáticamente a la vista de inicio para que el usuario pueda realizar nuevas búsquedas o compras.
-    def procesar_pago(self):
-        nombre = self.entry_nombre.get().strip()
-        email = self.entry_email.get().strip()
-        compra = self.controller.compra_pendiente
-        # Validación de campos: Antes de procesar el pago, se verifica que los campos de nombre completo y correo electrónico estén completos. Si alguno de estos campos está vacío, se muestra una advertencia al usuario indicando que debe completar sus datos de contacto para emitir el boleto. Además, se verifica que haya un viaje seleccionado para procesar el pago; si no hay ningún viaje seleccionado, se muestra un mensaje de error indicando que no se ha seleccionado ningún viaje para procesar la compra. Esto garantiza que el proceso de pago solo se realice cuando se cuenta con la información necesaria y un viaje seleccionado, mejorando así la experiencia del usuario y evitando
-        if not nombre or not email:
-            messagebox.showwarning("Campos Requeridos", "Por favor, complete sus datos de contacto para emitir el boleto.")
-            return
-        if not compra or 'precio' not in compra:
-            messagebox.showerror("Error de Compra", "No se ha seleccionado ningún viaje para procesar el pago.")
-            return
+            # Función de procesamiento de pago: Esta función se activa cuando el usuario hace clic en el botón "Confirmar Transacción". Se encarga de recopilar los datos ingresados por el usuario, validar la información y mostrar un mensaje de confirmación de la transacción. Además, se actualiza el estado centralizado del controlador para reflejar que la compra ha sido procesada, se bloquea el asiento seleccionado en la base de datos local para que figure como ocupado, se inserta el ticket generado dentro del historial dinámico de la sesión y se navega automáticamente a la vista de inicio para que el usuario pueda realizar nuevas búsquedas o compras.
+def procesar_pago(self):
+    nombre = self.entry_nombre.get().strip()
+    email = self.entry_email.get().strip()
+    compra = self.controller.compra_pendiente
+    # Validación de campos: Antes de procesar el pago, se verifica que los campos de nombre completo y correo electrónico estén completos. Si alguno de estos campos está vacío, se muestra una advertencia al usuario indicando que debe completar sus datos de contacto para emitir el boleto. Además, se verifica que haya un viaje seleccionado para procesar el pago; si no hay ningún viaje seleccionado, se muestra un mensaje de error indicando que no se ha seleccionado ningún viaje para procesar la compra. Esto garantiza que el proceso de pago solo se realice cuando se cuenta con la información necesaria y un viaje seleccionado, mejorando así la experiencia del usuario y evitando
+    if not nombre or not email:
+        messagebox.showwarning("Campos Requeridos", "Por favor, complete sus datos de contacto para emitir el boleto.")
+        return
+    if not compra or 'precio' not in compra:
+        messagebox.showerror("Error de Compra", "No se ha seleccionado ningún viaje para procesar el pago.")
+        return
             
-        msg = f"¡Pago Procesado Exitosamente!\n\nEstimado(a) {nombre}, el cobro de Bs {compra['precio']} se realizó correctamente a tu tarjeta.\nTu boleto digital con código QR de embarque fue enviado a: {email}"
+    # --- PROCESAMIENTO INTERNO Y LÓGICA DE NEGOCIO REAL ---
+    # Generación aleatoria del código alfanumérico único para el ticket
+    codigo_ticket = f"PBB-{random.randint(1000, 9999)}{random.choice(['A','B','C','D','X'])}"
+    compra["codigo_boleto"] = codigo_ticket
+    compra["pasajero_nombre"] = nombre
+    compra["pasajero_email"] = email
+    
+    # Bloqueo del asiento seleccionado en la base de datos local para que figure ocupado
+    for viaje in self.controller.viajes_data:
+        if viaje["id"] == compra["viaje_id"]:
+            viaje["asientos_ocupados"].append(compra["asiento"])
+            break
+    
+    # Inserción del ticket generado dentro del historial dinámico de la sesión
+    self.controller.historial_compras.append(compra)
             
-        messagebox.showinfo("Transacción Exitosa", msg)
-        # Limpieza de datos y navegación a inicio: Después de procesar el pago, se limpian los campos de entrada para el nombre completo y correo electrónico, se restablece el estado centralizado del controlador para reflejar que no hay ninguna compra pendiente ni búsqueda rápida activa, y se navega automáticamente a la vista de inicio para que el usuario pueda realizar nuevas búsquedas o compras. Esto garantiza un flujo de navegación fluido y una experiencia de usuario coherente después
-        self.entry_nombre.delete(0, tk.END)
-        self.entry_email.delete(0, tk.END)
-        self.controller.compra_pendiente = {}
-        self.controller.busqueda_rapida = {}
-        self.controller.show_frame("InicioView")
+    msg = f"¡Pago Procesado Exitosamente!\n\nEstimado(a) {nombre}, el cobro de Bs {compra['precio']} se realizó correctamente a tu tarjeta.\n\nCódigo Único de Boleto: {codigo_ticket}\nAsiento Reservado: #{compra['asiento']}\n\nTu boleto digital con código QR de embarque fue enviado a: {email}"
+            
+    messagebox.showinfo("Transacción Exitosa", msg)
+    # Limpieza de datos y navegación a inicio: Después de procesar el pago, se limpian los campos de entrada para el nombre completo y correo electrónico, se restablece el estado centralizado del controlador para reflejar que no hay ninguna compra pendiente ni búsqueda rápida activa, y se navega automáticamente a la vista de inicio para que el usuario pueda realizar nuevas búsquedas o compras. Esto garantiza un flujo de navegación fluido y una experiencia de usuario coherente después
+    self.entry_nombre.delete(0, tk.END)
+    self.entry_email.delete(0, tk.END)
+    self.controller.compra_pendiente = {}
+    self.controller.busqueda_rapida = {}
+    self.controller.show_frame("InicioView")
 
 #PÁGINA 4: GUÍA DE TURISMO DE BOLIVIA (CON CONTENEDORES IMÁGENES)
 class TurismoView(ctk.CTkFrame):
@@ -522,6 +596,55 @@ class TurismoView(ctk.CTkFrame):
             # descripción del destino turístico, con un diseño claro y legible para facilitar la lectura y comprensión por parte de los usuarios. Esta descripción proporciona información relevante sobre el destino, lo que puede ayudar a los usuarios a generar interés y conexión emocional con el contenido presentado, enriqueciendo así su experiencia al explorar las opciones de destinos turísticos disponibles a través de PlusBus.
             desc_label = ctk.CTkLabel(card_inner, text=dest["desc"], font=("Inter", 18), text_color=COLOR_TEXT_DARK, wraplength=680)
             desc_label.pack(anchor="w", pady=(10, 0), fill=tk.X)
+
+#NUEVA PÁGINA: HISTORIAL DE COMPRAS 
+class HistorialView(ctk.CTkFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, corner_radius=0, fg_color=COLOR_BG_LIGHT)
+        self.controller = controller
+        
+        ctk.CTkLabel(self, text="Historial de Boletos Emitidos", font=("Inter", 24, "bold"), text_color=COLOR_BLUE_DARK).pack(pady=(30, 5), padx=30, anchor="w")
+        ctk.CTkLabel(self, text="Registro centralizado de pasajes adquiridos durante la sesión activa", font=("Inter", 13), text_color=COLOR_TEXT_MUTED).pack(pady=(0, 15), padx=30, anchor="w")
+        
+        self.scroll_historial = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.scroll_historial.pack(fill=tk.BOTH, expand=True, padx=30, pady=10)
+
+    def al_mostrar_vista(self):
+        # Limpieza recursiva de elementos visuales previos para redibujar con datos nuevos
+        for widget in self.scroll_historial.winfo_children():
+            widget.destroy()
+            
+        compras = self.controller.historial_compras
+        
+        if not compras:
+            no_tickets = ctk.CTkLabel(self.scroll_historial, text="📜 No se registran pasajes adquiridos en este momento.", font=("Inter", 14), text_color=COLOR_TEXT_MUTED)
+            no_tickets.pack(pady=50)
+            return
+            
+        # Despliegue visual ordenado (Muestra los boletos más recientes primero)
+        for ticket in reversed(compras):
+            card = ctk.CTkFrame(self.scroll_historial, fg_color=COLOR_WHITE, corner_radius=10, border_width=1, border_color="#e2e8f0")
+            card.pack(fill=tk.X, pady=8, padx=5)
+
+            # Componente de información del boleto: Este componente se encarga de mostrar los detalles relevantes de cada boleto adquirido durante la sesión activa, como la empresa, ruta, horario, precio y asiento seleccionado. Se organiza de manera clara y visualmente atractiva para facilitar la lectura y comprensión por parte de los usuarios, permitiéndoles revisar fácilmente su historial de compras.
+            inner = ctk.CTkFrame(card, fg_color="transparent")
+            inner.pack(fill=tk.BOTH, expand=True, padx=20, pady=15)
+            
+            # Información principal del boleto: Se muestra la empresa de transporte y el código del boleto en un formato destacado para resaltar la información más relevante de cada compra. Esto permite a los usuarios identificar rápidamente cada boleto adquirido durante la sesión activa, facilitando la navegación y revisión de su historial de compras.
+            ctk.CTkLabel(inner, text=ticket["empresa"], font=("Inter", 16, "bold"), text_color=COLOR_BLUE_DARK).grid(row=0, column=0, sticky="w")
+            ctk.CTkLabel(inner, text=ticket["codigo_boleto"], font=("Inter", 13, "bold"), fg_color=COLOR_BLUE_LIGHT, text_color=COLOR_BLUE_MEDIUM, corner_radius=6, height=24, padx=10).grid(row=0, column=1, sticky="e")
+            
+            # Información detallada de la ruta: Se muestra información relevante sobre la ruta del viaje, incluyendo el origen, destino, fecha y hora. Esta información se presenta de manera clara y organizada para facilitar la lectura y comprensión por parte de los usuarios, proporcionando un resumen completo de cada compra realizada durante la sesión activa.
+            detalles_ruta = f"📍 {ticket['origen']} ➔ {ticket['destino']}    |    📅 {ticket['fecha']} - 🕒 {ticket['hora']}"
+            ctk.CTkLabel(inner, text=detalles_ruta, font=("Inter", 12), text_color=COLOR_TEXT_DARK).grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 2))
+            
+            # Información detallada del boleto: Se muestra información relevante sobre el boleto adquirido, incluyendo el nombre del pasajero, el asiento seleccionado y el total pagado. Esta información se presenta de manera clara y organizada para facilitar la lectura y comprensión por parte de los usuarios, proporcionando un resumen completo de cada compra realizada durante la sesión activa.
+            detalles_pasajero = f"👤 Pasajero: {ticket['pasajero_nombre']}    •    💺 Asiento Seleccionado: #{ticket['asiento']}    •    💵 Total Pagado: Bs {ticket['precio']}"
+            ctk.CTkLabel(inner, text=detalles_pasajero, font=("Inter", 11), text_color=COLOR_TEXT_MUTED).grid(row=2, column=0, columnspan=2, sticky="w")
+            
+            # Configuración de pesos para que el contenido se distribuya adecuadamente dentro de la tarjeta, permitiendo que el título y el código del boleto se alineen a los extremos opuestos, mientras que los detalles de la ruta y del pasajero se muestren de manera clara y organizada debajo.
+            inner.grid_columnconfigure(0, weight=1)
+            inner.grid_columnconfigure(1, weight=1)
 
 # CONTROLADOR PRINCIPAL DE LA APLICACIÓN
 if __name__ == "__main__":
