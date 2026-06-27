@@ -6,6 +6,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 import re
 import random
+from PIL import Image
 
 #CONFIGURACIÓN GLOBAL DE ESTILOS
 
@@ -566,7 +567,7 @@ class TurismoView(ctk.CTkFrame):
 
         # Estructura de la vista de turismo: Se ha diseñado una estructura clara y visualmente atractiva para la vista de turismo, que incluye un encabezado con un título destacado y una descripción introductoria, seguido de un contenedor scrollable donde se muestran tarjetas visuales de destinos turísticos emblemáticos de Bolivia. Cada tarjeta incluye un marcador de posición para la imagen, un título, una descripción y una categoría, lo que enriquece la experiencia del usuario al proporcionar contenido adicional relacionado con los viajes que pueden realizar a través de PlusBus.
         ctk.CTkLabel(self, text="Descubre Bolivia con PlusBus", font=("Inter", 30, "bold"), text_color=COLOR_BLUE_DARK).pack(pady=(30, 5), padx=30, anchor="w")
-        ctk.CTkLabel(self, text="Conoce los destinos emblemáticos a los que puedes viajar con nuestras flotas", font=("Inter", 18), text_color=COLOR_TEXT_MUTED).pack(pady=(0, 15), padx=30, anchor="w")
+        ctk.CTkLabel(self, text="Conoce los destinos emblemáticos a los que puedes viajar con nuestras flotas", font=("Inter", 18), text_color=COLOR_ORANGE).pack(pady=(0, 15), padx=30, anchor="w")
         
         # Contenedor scrollable para los destinos turísticos: Este contenedor permite mostrar una lista de destinos turísticos que puede ser más larga que el espacio visible en la pantalla. Al ser scrollable, los usuarios pueden desplazarse hacia abajo para explorar todas las opciones disponibles sin que la interfaz se sature, manteniendo una experiencia de usuario fluida y organizada.
         self.scroll_turismo = ctk.CTkScrollableFrame(self, fg_color="transparent")
@@ -574,15 +575,15 @@ class TurismoView(ctk.CTkFrame):
         
         # Listado de destinos turísticos: Se ha creado un listado de destinos turísticos emblemáticos de Bolivia, cada uno con un título, descripción, categoría y un marcador de posición para la imagen. Estos destinos se muestran en tarjetas visuales dentro de un contenedor scrollable, lo que permite a los usuarios explorar fácilmente las opciones disponibles y obtener información relevante sobre cada destino. Esto enriquece la experiencia del usuario al proporcionar contenido adicional relacionado con los viajes que pueden realizar a través de PlusBus.
         destinos = [
-    {"titulo": "Salar de Uyuni (Potosí)", "desc": "El desierto de sal continuo más grande y alto del mundo. Un espejo natural infinito durante la época de lluvias.", "cat": "Altiplano", "img_placeholder": "🖼️ [FOTOGRAFÍA: SALAR DE UYUNI INFINITO]"},
-    {"titulo": "Cochabamba - Ciudad Jardín", "desc": "El corazón de Bolivia. Famosa por su gastronomía insuperable, clima templado y el imponente Cristo de la Concordia.", "cat": "Valles", "img_placeholder": "🖼️ [FOTOGRAFÍA: PAISAJE CRISTO DE LA CONCORDIA Y VALLES]"},
-    {"titulo": "Tiahuanaco (La Paz)", "desc": "Cuna de una de las civilizaciones prehispánicas más longevas y avanzadas de América del Sur. Misterio arqueológico ancestral.", "cat": "Altiplano", "img_placeholder": "🖼️ [FOTOGRAFÍA: PUERTA DEL SOL - RUINAS TIAHUANACO]"},
-    {"titulo": "Amazonía Indómita (Pando)", "desc": "El rincón salvaje y verde de Bolivia. Cubierto por densas selvas tropicales y ríos caudalosos ideales para la aventura.", "cat": "Llanos", "img_placeholder": "🖼️ [FOTOGRAFÍA: RESERVA NATURAL AMAZÓNICA - PANDO]"},
-    {"titulo": "Misiones de Santa Cruz", "desc": "El motor económico de Bolivia. Tierra tropical vibrante, famosa por sus misiones jesuíticas y el Parque Nacional Amboró.", "cat": "Llanos", "img_placeholder": "🖼️ [FOTOGRAFÍA: CATEDRAL DE SANTA CRUZ O SELVA]"},
-    {"titulo": "Ciudad Blanca (Chuquisaca)", "desc": "La capital constitucional de Bolivia. Destaca por su arquitectura colonial impecable y las impresionantes huellas de dinosaurio.", "cat": "Valles", "img_placeholder": "🖼️ [FOTOGRAFÍA: CALLES COLONIALES DE SUCRE]"},
-    {"titulo": "Capital del Folklore (Oruro)", "desc": "Sede de uno de los carnavales más espectaculares del mundo, lleno de devoción, danzas tradicionales y cultura andina.", "cat": "Altiplano", "img_placeholder": "🖼️ [FOTOGRAFÍA: BAILARÍN DE DIABLADA EN ORURO]"},
-    {"titulo": "Ruta del Vino (Tarija)", "desc": "El valle andaluz. Un destino de clima cálido, gente amable y los viñedos a mayor altitud del mundo.", "cat": "Valles", "img_placeholder": "🖼️ [FOTOGRAFÍA: VIÑEDOS DE TARIJA AL ATARDECER]"},
-    {"titulo": "Sabana Amazónica (Beni)", "desc": "Un paraíso de biodiversidad y llanuras inundables. Ideal para navegar por ríos y observar fauna exótica en su hábitat natural.", "cat": "Llanos", "img_placeholder": "🖼️ [FOTOGRAFÍA: RÍO Y SELVA EN EL BENI]"}
+    {"titulo": "Salar de Uyuni (Potosí)", "desc": "El desierto de sal continuo más grande y alto del mundo. Un espejo natural infinito durante la época de lluvias.", "cat": "Altiplano", "imagen": "imagenes/salarUyuni.webp"},
+    {"titulo": "Cochabamba - Ciudad Jardín", "desc": "El corazón de Bolivia. Famosa por su gastronomía insuperable, clima templado y el imponente Cristo de la Concordia.", "cat": "Valles", "imagen": "imagenes/cristo.jpg"},
+    {"titulo": "Tiahuanaco (La Paz)", "desc": "Cuna de una de las civilizaciones prehispánicas más longevas y avanzadas de América del Sur. Misterio arqueológico ancestral.", "cat": "Altiplano", "imagen": "imagenes/lapaz.jpg"},
+    {"titulo": "Amazonía Indómita (Pando)", "desc": "El rincón salvaje y verde de Bolivia. Cubierto por densas selvas tropicales y ríos caudalosos ideales para la aventura.", "cat": "Llanos", "imagen": "imagenes/pando.jpg"},
+    {"titulo": "Misiones de Santa Cruz", "desc": "El motor económico de Bolivia. Tierra tropical vibrante, famosa por sus misiones jesuíticas y el Parque Nacional Amboró.", "cat": "Llanos", "imagen": "imagenes/santacruz.jpg"},
+    {"titulo": "Ciudad Blanca (Chuquisaca)", "desc": "La capital constitucional de Bolivia. Destaca por su arquitectura colonial impecable y las impresionantes huellas de dinosaurio.", "cat": "Valles", "imagen": "imagenes/sucre.jpg"},
+    {"titulo": "Capital del Folklore (Oruro)", "desc": "Sede de uno de los carnavales más espectaculares del mundo, lleno de devoción, danzas tradicionales y cultura andina.", "cat": "Altiplano", "imagen": "imagenes/oruro.png"},
+    {"titulo": "Ruta del Vino (Tarija)", "desc": "El valle andaluz. Un destino de clima cálido, gente amable y los viñedos a mayor altitud del mundo.", "cat": "Valles", "imagen": "imagenes/tarija.jpg"},
+    {"titulo": "Sabana Amazónica (Beni)", "desc": "Un paraíso de biodiversidad y llanuras inundables. Ideal para navegar por ríos y observar fauna exótica en su hábitat natural.", "cat": "Llanos", "imagen": "imagenes/beni.jpg"}
 ]
         # Generación de tarjetas para cada destino turístico: Para cada destino en el listado, se crea una tarjeta visual que incluye un marcador de posición para la imagen, un título destacado, una descripción informativa y una categoría resaltada. Estas tarjetas se organizan dentro de un contenedor scrollable, lo que permite a los usuarios explorar fácilmente las opciones disponibles y obtener información relevante sobre cada destino. Esto enriquece la experiencia del usuario al proporcionar contenido adicional relacionado con los viajes que pueden realizar a través de PlusBus.
         for dest in destinos:
@@ -590,13 +591,25 @@ class TurismoView(ctk.CTkFrame):
             card.pack(fill=tk.X, pady=12, padx=5)
             
             #COMPONENTE VISUAL: Marco contenedor de Imagen
-            img_frame = ctk.CTkFrame(card, height=140, fg_color="#cbd5e1", corner_radius=25)
+            img_frame = ctk.CTkFrame(card, height=400, fg_color="#cbd5e1", corner_radius=25)
             img_frame.pack(fill=tk.X, padx=12, pady=(12, 4))
             img_frame.pack_propagate(False)
             
-            #label con marcador de posición para la imagen del destino turístico, diseñado para ser visualmente atractivo y proporcionar una referencia clara de que se espera una imagen en ese espacio. Esto ayuda a mejorar la experiencia del usuario al indicar que se mostrará una fotografía representativa del destino turístico, lo que puede generar mayor interés y conexión emocional con el contenido presentado.
-            lbl_img = ctk.CTkLabel(img_frame, text=dest["img_placeholder"], font=("Inter", 15, "bold"), text_color=COLOR_BLUE_DARK)
-            lbl_img.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            # Carga de imagen para el destino turístico: Se utiliza la biblioteca PIL para abrir la imagen correspondiente al destino turístico y se crea un objeto CTkImage que se adapta al tamaño del marco contenedor. Esto permite mostrar la imagen de manera clara y visualmente atractiva dentro de la tarjeta, mejorando la experiencia del usuario al explorar los destinos turísticos disponibles a través de PlusBus.
+            img = ctk.CTkImage(
+                light_image=Image.open(dest["imagen"]),
+                dark_image=Image.open(dest["imagen"]),
+                size=(1200,500))
+
+            # Creación de la etiqueta de imagen: Se crea una etiqueta CTkLabel que contiene la imagen del destino turístico y se agrega al marco contenedor. La etiqueta se configura para llenar todo el espacio disponible dentro del marco, asegurando que la imagen se muestre de manera adecuada y atractiva. Esto mejora la experiencia del usuario al proporcionar una representación visual clara de cada destino turístico, lo que puede generar interés y conexión emocional con el contenido presentado.
+            lbl_img = ctk.CTkLabel(
+                img_frame,
+                image=img,
+                text="")
+
+            # La referencia a la imagen se mantiene en la etiqueta para evitar que sea recolectada por el recolector de basura de Python, lo que garantiza que la imagen se muestre correctamente en la interfaz de usuario.
+            lbl_img.image = img
+            lbl_img.pack(fill="both", expand=True)
             
             #COMPONENTE TEXTUAL: Datos informativos
             card_inner = ctk.CTkFrame(card, fg_color="transparent")
